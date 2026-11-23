@@ -43,6 +43,10 @@ jobs:
           node-version: 22
           cache: npm
 
+      # El package-lock.json se genera con npm 11 (el de desarrollo); con el
+      # npm 10 que trae Node 22, `npm ci` lo da por desincronizado.
+      - run: npm install -g npm@11
+
       - run: npm ci
 
       - name: Validar contenido
