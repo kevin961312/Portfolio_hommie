@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
-import { suscribirAcople } from './acople';
+import { acopleEnCompositor, suscribirAcople } from './acople';
 import styles from './PortadaDisco.module.css';
 
 /* ──────────────────────────────────────────────────────────────
@@ -10,7 +10,9 @@ import styles from './PortadaDisco.module.css';
    elemento. Aquí solo va el brillo centrado donde está el disco (los
    surcos y las ondas son del fondo fijo de todo el sitio, `FondoOndas`),
    que se aleja de 1 a 0,95 mientras el logo sube al menú, y
-   una marca de «baja» que se apaga en el mismo tramo.
+   una marca de «baja» que se apaga en el mismo tramo. Donde hay
+   `animation-timeline: scroll()` las dos cosas las hace el CSS en el
+   compositor; si no, el oyente de `acople.ts`.
    `children` (opcional) se pinta abajo, sobre el fondo.
    ────────────────────────────────────────────────────────────── */
 
@@ -25,10 +27,22 @@ export default function PortadaDisco({ children }: { children?: ReactNode }) {
     const pista = pistaRef.current;
     if (!fondo || !pista) return;
     const reducido = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let enCompositor = false;
     return suscribirAcople(({ progreso }) => {
+      // Con animaciones atadas al scroll lo hace el CSS en el compositor.
+      if (acopleEnCompositor()) {
+        if (!enCompositor) {
+          enCompositor = true;
+          fondo.style.transform = '';
+          fondo.style.willChange = '';
+          pista.style.opacity = '';
+        }
+        return;
+      }
+      enCompositor = false;
       fondo.style.transform = reducido.matches ? '' : `scale(${1 - (1 - ESCALA_FINAL) * progreso})`;
-      // Capa propia solo a mitad de camino; quieto, vuelve a pintarse nítido.
-      fondo.style.willChange = progreso > 0 && progreso < 1 && !reducido.matches ? 'transform' : '';
+      // Capa estable mientras se mueve (sin ponerla y quitarla a mitad del gesto).
+      fondo.style.willChange = reducido.matches ? '' : 'transform';
       pista.style.opacity = String(Math.max(0, 1 - progreso * 2.5));
     });
   }, []);

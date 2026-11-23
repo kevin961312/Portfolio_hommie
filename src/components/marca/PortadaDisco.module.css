@@ -81,6 +81,37 @@
   }
 }
 
+/* Atado al scroll en el compositor (mismo recorrido que el logo,
+   `RECORRIDO_ACOPLE` = 320 px; la «baja» se apaga en el primer 40 %).
+   Sin soporte, lo hace el JS de PortadaDisco. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .fondo {
+      animation: alejar linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0px 320px;
+    }
+
+    .pista {
+      animation: apagarPista linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0px 128px;
+    }
+  }
+}
+
+@keyframes alejar {
+  to {
+    transform: scale(0.95);
+  }
+}
+
+@keyframes apagarPista {
+  to {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pista span {
     animation: none;

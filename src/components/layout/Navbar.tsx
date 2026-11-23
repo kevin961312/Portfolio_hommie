@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import type { CSSProperties } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { IconMenu, IconClose } from '../icons';
 import LogoDisco from '../marca/LogoDisco';
-import { suscribirAcople } from '../marca/acople';
+import { acopleEnCompositor, suscribirAcople } from '../marca/acople';
 import { entrada } from '../marca/entrada';
 import type { FaseEntrada } from '../marca/entrada';
 import { usePerfil } from '../../hooks/usePerfil';
@@ -29,6 +30,9 @@ interface Caja {
 /** Transform (con origen arriba a la izquierda) que lleva la caja `de` a `a`. */
 const llevar = (de: Caja, a: Caja, p = 1) =>
   `translate3d(${(a.left - de.left) * p}px, ${(a.top - de.top) * p}px, 0) scale(${1 + (a.width / de.width - 1) * p})`;
+
+const igual = (a: Caja, b: Caja) =>
+  Math.abs(a.left - b.left) < 0.5 && Math.abs(a.top - b.top) < 0.5 && Math.abs(a.width - b.width) < 0.5;
 
 const faseServidor = (): FaseEntrada => 'lista';
 
@@ -67,8 +71,11 @@ export default function Navbar() {
      El logo es UN solo elemento (`viajero`). En la portada está fijo,
      grande y centrado (su caja natural, por CSS) y un transform lo lleva
      hasta la ranura del menú según el scroll (FLIP: se miden las dos
-     cajas y se interpola translate + scale). En las demás páginas vive
-     quieto dentro de la ranura. */
+     cajas y se interpola translate + scale). Donde se puede, la
+     interpolación la hace una animación CSS atada al scroll
+     (`animation-timeline: scroll()`, en el compositor) y el JS solo deja
+     el destino en `--acople`. En las demás páginas vive quieto dentro de
+     la ranura. */
   useLayoutEffect(() => {
     const nav = navRef.current;
     const ranura = ranuraRef.current;
@@ -116,34 +123,61 @@ export default function Navbar() {
       return;
     }
 
-    let grande: Caja = viajero.getBoundingClientRect();
-    let acoplado: Caja = ranura.getBoundingClientRect();
+    let grande: Caja = { left: 0, top: 0, width: 1 };
+    let acoplado: Caja = { left: 0, top: 0, width: 1 };
     let primero = true;
+    let enCompositorAntes: boolean | null = null;
 
+    /* Cajas del FLIP sin quitar el transform: la grande sale de los
+       `left/top/width` resueltos del logo fijo (no cambian con el transform
+       ni con la animación) y la acoplada, de la ranura (que no se mueve).
+       Devuelve false si nada cambió (p. ej. la barra de direcciones del
+       teléfono que se esconde: dispara `resize`, pero las cajas usan svh/vw). */
     const medir = () => {
-      viajero.style.transform = 'none';
-      grande = viajero.getBoundingClientRect();
-      acoplado = ranura.getBoundingClientRect();
+      const cs = getComputedStyle(viajero);
+      const g = { left: parseFloat(cs.left), top: parseFloat(cs.top), width: parseFloat(cs.width) };
+      const r = ranura.getBoundingClientRect();
+      const a = { left: r.left, top: r.top, width: r.width };
+      if (igual(g, grande) && igual(a, acoplado)) return false;
+      grande = g;
+      acoplado = a;
       grandeRef.current = grande;
+      // Destino del FLIP para la animación CSS atada al scroll (se mueve en
+      // el compositor) y para el estado acoplado.
+      viajero.style.setProperty('--acople', llevar(grande, acoplado));
+      return true;
     };
 
     const quitar = suscribirAcople(({ progreso, oculto, medir: hayQueMedir }) => {
-      if (hayQueMedir) medir();
+      const cambio = hayQueMedir && medir();
+      const enCompositor = acopleEnCompositor();
+      const pasaAlCompositor = enCompositor && enCompositorAntes !== true;
+      enCompositorAntes = enCompositor;
       const transform = llevar(grande, acoplado, progreso);
-      viajero.style.transform = transform;
+      if (!enCompositor) {
+        // Respaldo (sin animaciones atadas al scroll o con movimiento
+        // reducido): solo se escribe `transform`, sin lecturas por cuadro.
+        viajero.style.transform = transform;
+      } else if (cambio || pasaAlCompositor) {
+        // El CSS lo mueve; el transform en línea es solo el del estado
+        // acoplado (cuando la animación se apaga, ver `data-acoplado`).
+        viajero.style.transform = llevar(grande, acoplado);
+      }
       cajaVisibleRef.current = {
         left: grande.left + (acoplado.left - grande.left) * progreso,
         top: grande.top + (acoplado.top - grande.top) * progreso,
         width: grande.width + (acoplado.width - grande.width) * progreso,
       };
-      // Acoplado: ya es parte del menú y se puede tocar.
+      // Acoplado: ya es parte del menú y se puede tocar. Además apaga la
+      // animación y suelta la capa: el disco quieto se vuelve a pintar nítido
+      // a su tamaño chico. Hasta entonces la capa es estable (sin
+      // `will-change` que se pone y se quita a mitad del gesto).
       viajero.toggleAttribute('data-acoplado', progreso >= 1);
-      // Solo a mitad de camino se promueve a capa (`will-change`); en los
-      // extremos se suelta para que el disco quieto se vea nítido.
-      viajero.toggleAttribute('data-escalando', progreso > 0 && progreso < 1);
-      // El nombre fijo aparece cuando el disco ya casi llegó.
+      // El nombre fijo aparece cuando el disco ya casi llegó (en el
+      // compositor lo hace el CSS).
       const opacidadNombre = String(Math.min(1, Math.max(0, (progreso - 0.55) / 0.45)));
-      nombre.style.opacity = opacidadNombre;
+      if (!enCompositor) nombre.style.opacity = opacidadNombre;
+      else if (pasaAlCompositor) nombre.style.opacity = '';
       nav.toggleAttribute('data-oculto', oculto && !menuAbiertoRef.current);
 
       // Viene de otra página: sale de la ranura hasta su sitio en la portada.
@@ -166,8 +200,8 @@ export default function Navbar() {
     return () => {
       quitar();
       viajero.style.transform = '';
+      viajero.style.removeProperty('--acople');
       viajero.removeAttribute('data-acoplado');
-      viajero.removeAttribute('data-escalando');
       nombre.style.opacity = '';
       nav.removeAttribute('data-oculto');
     };
@@ -179,6 +213,23 @@ export default function Navbar() {
       sitio; en las demás páginas, el nombre de la sección. */
   const seccionActual = enPortada ? sitio.nombre : navItems.find((item) => item.path === pathname)?.label;
 
+  /* Marca de agua a lo ancho de la barra: el CSS calcula el tamaño con
+     unidades de contenedor (`cqw`) y el ancho del texto en `em`. Ese ancho
+     se mide una vez por texto (y cuando carga la fuente); los cambios de
+     tamaño de la ventana los resuelve el CSS solo. */
+  const marcaRef = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const marca = marcaRef.current;
+    if (!marca) return;
+    const medirMarca = () => {
+      const tamano = parseFloat(getComputedStyle(marca).fontSize);
+      if (tamano > 0) marca.style.setProperty('--ancho-em', String(marca.scrollWidth / tamano));
+    };
+    medirMarca();
+    document.fonts?.addEventListener('loadingdone', medirMarca);
+    return () => document.fonts?.removeEventListener('loadingdone', medirMarca);
+  }, [pathname, seccionActual]);
+
   return (
     <nav
       ref={navRef}
@@ -188,7 +239,13 @@ export default function Navbar() {
     >
       {seccionActual && (
         <span className={styles.marcaAgua} aria-hidden="true">
-          <span key={pathname}>{seccionActual}</span>
+          <span
+            key={pathname}
+            ref={marcaRef}
+            style={{ '--letras': seccionActual.length } as CSSProperties}
+          >
+            {seccionActual}
+          </span>
         </span>
       )}
       <div className={styles.inner}>

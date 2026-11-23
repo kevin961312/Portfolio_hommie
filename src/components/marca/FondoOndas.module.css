@@ -7,7 +7,13 @@
   --radio-disco: min(13.4vw, 31svh);
   --centro-y: 50svh;
   position: fixed;
-  inset: 0;
+  /* 100lvh y no `inset: 0`: el alto no cambia cuando la barra de
+     direcciones del teléfono se esconde (el lienzo no se reestira ni se
+     vuelve a crear a mitad del scroll). En escritorio lvh = vh. */
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100lvh;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;

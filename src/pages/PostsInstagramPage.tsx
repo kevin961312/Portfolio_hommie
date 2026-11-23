@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import EncabezadoPagina from '../components/layout/EncabezadoPagina';
 import CajaCD from '../components/post/CajaCD';
+import DiscoCargando from '../components/marca/DiscoCargando';
 import VisorPost from '../components/post/VisorPost';
 import { IconExternalLink, IconHeart } from '../components/icons';
 import { formatearMetrica } from '../lib/formato';
@@ -235,7 +236,7 @@ export default function PostsInstagramPage() {
       {/* Al llegar aquí se suma otra tanda; mientras tanto, el loader. */}
       {hayMas && (
         <div ref={centinelaRef} className={styles.masPosts} role="status">
-          <span className={styles.giro} aria-hidden="true" />
+          <DiscoCargando tamano={28} />
           Cargando más publicaciones
         </div>
       )}

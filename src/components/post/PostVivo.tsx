@@ -3,6 +3,7 @@ import type { RefObject } from 'react';
 import type { PostInstagram } from '../../types';
 import { limpiarUrlInstagram, procesarEmbedsInstagram } from '../../lib/instagram';
 import { IconExternalLink } from '../icons';
+import DiscoCargando from '../marca/DiscoCargando';
 import styles from './PostVivo.module.css';
 
 /** El embed de Instagram no baja de este ancho (326 px + 2 de borde). */
@@ -102,7 +103,7 @@ function useToqueEnIframe(
 function Cargando() {
   return (
     <span className={styles.cargando} role="status" aria-label="Cargando publicación">
-      <span className={styles.giro} />
+      <DiscoCargando tamano={40} />
     </span>
   );
 }

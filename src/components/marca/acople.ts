@@ -10,11 +10,36 @@
      Con movimiento reducido salta de 0 a 1 a mitad de camino.
    - `oculto`: pasados UMBRAL_OCULTAR px, true al bajar y false al subir.
    - `medir`: true cuando cambió el tamaño de la ventana (hay que volver
-     a medir las cajas del FLIP).
+     a medir las cajas del FLIP; quien escucha compara y, si nada cambió,
+     como al esconderse la barra de direcciones del teléfono, no hace nada).
+
+   Donde hay animaciones atadas al scroll (`animation-timeline: scroll()`,
+   Chrome 115+, Safari 26+) el movimiento continuo (logo, brillo de la
+   portada, nombre del menú) lo hace el CSS en el compositor, al mismo
+   ritmo que el scroll aunque el hilo principal se atrase: ver
+   `acopleEnCompositor()`. Este oyente queda para los estados discretos
+   (`data-acoplado`, `data-oculto`) y como respaldo (otros navegadores o
+   movimiento reducido), en el que solo se escribe `transform`.
    ────────────────────────────────────────────────────────────── */
 
+/** Mismo valor que `animation-range` en Navbar.module.css y PortadaDisco.module.css. */
 export const RECORRIDO_ACOPLE = 320;
 export const UMBRAL_OCULTAR = 750;
+
+const LINEA_SCROLL = typeof CSS !== 'undefined' && CSS.supports('animation-timeline: scroll()');
+let mqReducido: MediaQueryList | null = null;
+
+/**
+ * true si el CSS mueve el acople en el compositor (hay `animation-timeline`
+ * y no se pidió movimiento reducido): entonces el JS no escribe transforms
+ * por cuadro. Las reglas CSS van con la misma condición (`@supports` +
+ * `prefers-reduced-motion: no-preference`).
+ */
+export function acopleEnCompositor() {
+  if (!LINEA_SCROLL) return false;
+  mqReducido ??= window.matchMedia('(prefers-reduced-motion: reduce)');
+  return !mqReducido.matches;
+}
 
 export interface EstadoAcople {
   progreso: number;

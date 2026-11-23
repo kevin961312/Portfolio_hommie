@@ -1,0 +1,19 @@
+.disco {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 50%;
+  animation: girar 1.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Movimiento reducido: gira despacio (sigue diciendo «cargando»). */
+@media (prefers-reduced-motion: reduce) {
+  .disco {
+    animation-duration: 6s;
+  }
+}

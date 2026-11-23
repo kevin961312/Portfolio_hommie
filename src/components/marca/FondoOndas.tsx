@@ -13,6 +13,12 @@ import styles from './FondoOndas.module.css';
      páginas, la onda se abre un poco y se atenúa para no competir con
      el contenido.
    - 30 cuadros por segundo; se pausa con la pestaña oculta.
+   - En pantallas táctiles (`pointer: coarse`) no dibuja mientras hay
+     scroll (ni durante la inercia): la GPU del teléfono queda libre para
+     el scroll y el logo que sube al menú. Al soltar, la onda alcanza su
+     estado (abierta y tenue) con el mismo seguimiento suave.
+   - La capa mide 100lvh: cuando la barra de direcciones del teléfono se
+     esconde o aparece no cambia de tamaño (no se reestira el lienzo).
    - `prefers-reduced-motion`: un solo cuadro quieto (y se respeta si
      cambia en vivo).
    - Sin WebGL: quedan los surcos y los anillos CSS de antes.
@@ -20,6 +26,8 @@ import styles from './FondoOndas.module.css';
 
 const DPR_MAX = 1.5;
 const MS_CUADRO = 1000 / 30;
+/** Pausa táctil: se reanuda este tiempo después del último evento de scroll. */
+const MS_REANUDAR = 140;
 /** Instante del cuadro quieto en reduced motion (una forma equilibrada). */
 const T_QUIETO = 37;
 
@@ -47,7 +55,12 @@ export default function FondoOndas() {
     fondo.dataset.lienzo = '';
 
     const movimiento = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const tactil = window.matchMedia('(pointer: coarse)');
     let quieto = movimiento.matches;
+    /** Alto de la capa (100lvh), medido en cada cambio de tamaño real. */
+    let alto = window.innerHeight;
+    let desplazando = false;
+    let reanudar = 0;
     let raf = 0;
     let ultimo = 0;
     let s = -1;
@@ -56,7 +69,7 @@ export default function FondoOndas() {
     /** 0 con el disco grande en la portada · 1 con el disco en el menú. */
     const objetivo = () => {
       if (!enPortadaRef.current) return 1;
-      const p = window.scrollY / (window.innerHeight * 0.6);
+      const p = window.scrollY / (alto * 0.6);
       if (quieto) return p > 0.5 ? 1 : 0; // cambio de estado, sin transición
       return Math.min(1, Math.max(0, p));
     };
@@ -66,6 +79,7 @@ export default function FondoOndas() {
       if (!onda) return;
       const caja = fondo.getBoundingClientRect();
       const a = ancla.getBoundingClientRect();
+      alto = caja.height;
       const dpr = Math.min(window.devicePixelRatio || 1, DPR_MAX);
       // Mismo corte que el CSS (720 px): en el teléfono el texto va debajo del disco.
       const movil = caja.width <= 720;
@@ -82,7 +96,7 @@ export default function FondoOndas() {
 
     const cuadro = (ahora: number) => {
       raf = requestAnimationFrame(cuadro);
-      if (ahora - ultimo < MS_CUADRO - 2) return;
+      if (desplazando || ahora - ultimo < MS_CUADRO - 2) return;
       ultimo = ahora;
       dibujar(ahora);
     };
@@ -114,7 +128,15 @@ export default function FondoOndas() {
     // En reduced motion no hay bucle: se redibuja solo si cambia el estado.
     let estadoQuieto = objetivo();
     const alHacerScroll = () => {
-      if (!quieto) return;
+      if (!quieto) {
+        if (!tactil.matches) return;
+        desplazando = true;
+        window.clearTimeout(reanudar);
+        reanudar = window.setTimeout(() => {
+          desplazando = false;
+        }, MS_REANUDAR);
+        return;
+      }
       const e = objetivo();
       if (e !== estadoQuieto) {
         estadoQuieto = e;
@@ -153,6 +175,7 @@ export default function FondoOndas() {
     return () => {
       cancelAnimationFrame(raf);
       window.clearTimeout(espera);
+      window.clearTimeout(reanudar);
       observador.disconnect();
       movimiento.removeEventListener('change', alCambiarMovimiento);
       document.removeEventListener('visibilitychange', alCambiarVisibilidad);

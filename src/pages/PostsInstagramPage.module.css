@@ -215,26 +215,8 @@
   color: var(--color-text-muted);
 }
 
-.giro {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 3px solid rgba(246, 240, 220, 0.25);
-  border-top-color: var(--color-oro-400);
-  animation: girar 0.8s linear infinite;
-}
 
-@keyframes girar {
-  to {
-    transform: rotate(360deg);
-  }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .giro {
-    animation-duration: 2.4s;
-  }
-}
 
 @media (max-width: 900px) {
   .muro {

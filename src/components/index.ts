@@ -15,6 +15,7 @@ export type { DatoEncabezado } from './layout/EncabezadoPagina';
 export { default as LogoDisco } from './marca/LogoDisco';
 export { default as CortinaCarga } from './marca/CortinaCarga';
 export { default as FondoOndas } from './marca/FondoOndas';
+export { default as DiscoCargando } from './marca/DiscoCargando';
 export { default as PortadaDisco } from './marca/PortadaDisco';
 export { entrada, TIEMPOS_ENTRADA } from './marca/entrada';
 export type { FaseEntrada } from './marca/entrada';

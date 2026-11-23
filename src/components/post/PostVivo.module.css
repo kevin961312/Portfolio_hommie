@@ -127,20 +127,7 @@
   animation: aparecer 0.3s ease 0.15s backwards;
 }
 
-.giro {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 3px solid rgba(246, 240, 220, 0.25);
-  border-top-color: var(--color-oro-400);
-  animation: girar 0.8s linear infinite;
-}
 
-@keyframes girar {
-  to {
-    transform: rotate(360deg);
-  }
-}
 
 @keyframes aparecer {
   from {
@@ -155,7 +142,4 @@
     transition: none;
   }
 
-  .giro {
-    animation-duration: 2.4s;
-  }
 }

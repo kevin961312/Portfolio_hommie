@@ -43,7 +43,7 @@ src/
 ├── components/          ← piezas reutilizables (ver «Componentes»)
 │   ├── index.ts         ← importa todo desde aquí
 │   ├── layout/          Navbar, Footer, EncabezadoPagina
-│   ├── marca/           LogoDisco, CortinaCarga, PortadaDisco, FondoOndas (logo tocadiscos, efecto open-rise y fondo de onda circular)
+│   ├── marca/           LogoDisco, CortinaCarga, PortadaDisco, FondoOndas, DiscoCargando (logo tocadiscos, efecto open-rise y fondo de onda circular)
 │   ├── metricas/        MetricasImpacto, MetricaCard
 │   ├── post/            TarjetaPost, PortadaPost, CajaCD (caja de CD y digipak), PostVivo, VisorPost   (Instagram)
 │   └── icons/           íconos SVG (IconInstagram, IconPlay, …)
@@ -228,8 +228,9 @@ lleno: se emparejó cada reel de Instagram con el mismo video en TikTok.
 |---|---|---|
 | `LogoDisco` | Logo circular que gira como un vinilo a 33⅓ rpm (WAAPI); arranca acelerando, frena al pasar el cursor o tocarlo y en la primera carga sus piezas suben de izquierda a derecha. | `logo` (`LogoPiezas`), `etiqueta?`, `girar?`, `className?` |
 | `CortinaCarga` | Cortina de la primera carga: línea que se llena con las imágenes y dos franjas inclinadas que se abren. Va una vez en `App.tsx`. | `minimo?` (800 ms), `maximo?` (4000 ms) |
-| `FondoOndas` | Fondo fijo de todo el sitio: espectro de audio circular alrededor del disco de la portada (WebGL, `marca/ondaEspectro.ts`): miles de trazos radiales en amarillos y ocres con halo, movimiento muy lento, 30 fps, pausa con la pestaña oculta y un cuadro quieto con movimiento reducido. Sin WebGL quedan los surcos CSS. Va una vez en `App.tsx`. | — |
-| `PortadaDisco` | Primera pantalla de la portada: fondo de surcos que se aleja (1 → 0,95) mientras el logo sube al menú. | `children?` |
+| `FondoOndas` | Fondo fijo de todo el sitio: espectro de audio circular alrededor del disco de la portada (WebGL, `marca/ondaEspectro.ts`): miles de trazos radiales en amarillos y ocres con halo, movimiento muy lento, 30 fps, pausa con la pestaña oculta y durante el scroll táctil, alto `100lvh` y un cuadro quieto con movimiento reducido. Sin WebGL quedan los surcos CSS. Va una vez en `App.tsx`. | — |
+| `DiscoCargando` | Indicador de carga: el disco del Homie (`public/brand/logo-homie.svg`) girando a 33⅓ rpm; con movimiento reducido gira despacio. Se usa en los posts que cargan y al final del muro. | `tamano?` (34 px) |
+| `PortadaDisco` | Primera pantalla de la portada: fondo de surcos que se aleja (1 → 0,95) mientras el logo sube al menú (CSS atado al scroll; JS de respaldo). | `children?` |
 
 En la portada, `SobreMiPage` pasa como `children` de `PortadaDisco` el «Sobre mí» (izquierda) y
 el contacto (derecha, de `sitio.redes` y `sitio.contacto`, sin mostrar campos vacíos); el centro
@@ -243,6 +244,28 @@ piezas comparten dos estados en `marca/acople.ts` (un solo oyente de scroll,
 un `requestAnimationFrame` por evento) y `marca/entrada.ts` (fases de la
 cortina). Con `prefers-reduced-motion` no hay cortina ni giro y el logo salta
 al menú a mitad del recorrido.
+
+El movimiento continuo del acople (logo, brillo de `PortadaDisco`, «baja» y nombre del
+menú) es CSS atado al scroll (`animation-timeline: scroll(root)`, `animation-range:
+0px 320px`, dentro de `@supports` y `prefers-reduced-motion: no-preference`): corre en el
+compositor, al ritmo exacto del dedo aunque el hilo principal del teléfono se atrase.
+El JS solo mide las dos cajas del FLIP (con `getComputedStyle`, sin quitar el transform)
+y deja el destino en `--acople`; vuelve a medir solo si una caja cambió de verdad (el
+`resize` de la barra de direcciones del teléfono se ignora). `acopleEnCompositor()` dice
+qué camino corre; sin soporte (navegadores viejos) o con movimiento reducido, el mismo
+oyente escribe solo `transform`. El logo tiene capa estable (`will-change`) toda la
+portada y la suelta al acoplarse (no se pone y quita a mitad del gesto: eso repintaba la
+página). Si cambia el recorrido, cambiar `RECORRIDO_ACOPLE` y los `animation-range` de
+`Navbar.module.css` y `PortadaDisco.module.css`.
+
+`FondoOndas` mide `100lvh` (no cambia de alto con la barra de direcciones) y, en
+pantallas táctiles (`pointer: coarse`), no dibuja mientras hay scroll: la onda se queda
+quieta durante el gesto y alcanza su estado ~140 ms después. En escritorio no cambia.
+
+La marca de agua de la barra (`.marcaAgua`) se ajusta al ancho con unidades de
+contenedor: `font-size: min(tamaño de siempre, (100cqw − 3rem) / --ancho-em)`. El Navbar
+mide `--ancho-em` (ancho del texto en em) una vez por texto y al cargar la fuente; el
+resto lo resuelve el CSS en cualquier ancho y con cualquier nombre de `sitio.json`.
 
 Logo nuevo (un .ai/.pdf circular en blanco y negro):
 

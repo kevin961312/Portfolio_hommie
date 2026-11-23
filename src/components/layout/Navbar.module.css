@@ -20,8 +20,12 @@
 }
 
 /* Nombre de la sección, gigante y apagado, de fondo en la barra (encima
-   del fondo sólido y debajo del contenido). Las letras son más altas que la
-   barra y se recortan arriba y abajo, como un sello. */
+   del fondo sólido y debajo del contenido). Se lee completo y centrado en
+   cualquier ancho y con cualquier texto: el tamaño es el menor entre el de
+   siempre y el que hace caber el texto en la barra (`100cqw` es el ancho de
+   la barra; `--ancho-em`, el ancho del texto en em, lo mide el Navbar una
+   vez por texto; antes de medir se estima con `--letras`). Si es más alto
+   que la barra se recorta arriba y abajo, como un sello. */
 .marcaAgua {
   position: absolute;
   inset: 0;
@@ -31,11 +35,16 @@
   justify-content: center;
   overflow: hidden;
   pointer-events: none;
+  container-type: inline-size;
 }
 
 .marcaAgua > span {
   font-family: var(--fuente-display);
   font-size: clamp(3.5rem, 7vw, 6rem);
+  font-size: min(
+    clamp(3.5rem, 7vw, 6rem),
+    calc((100cqw - 3rem) / var(--ancho-em, calc(var(--letras, 10) * 0.78)))
+  );
   line-height: 1;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -143,8 +152,58 @@
   pointer-events: auto;
 }
 
-.navbar[data-portada] .viajero[data-escalando] {
+/* Capa estable durante toda la portada (no se pone y se quita a mitad del
+   gesto: crear o soltar la capa repinta el logo y la página). Al acoplarse
+   se suelta y el disco chico se pinta nítido. */
+.navbar[data-portada] .viajero:not([data-acoplado]) {
   will-change: transform;
+}
+
+/* Acople en el compositor: el logo sube al ritmo exacto del scroll aunque
+   el hilo principal se atrase (en el teléfono, el JS por cuadro llegaba
+   tarde y el disco iba a saltos). El JS deja el destino del FLIP en
+   `--acople`; el recorrido (0 → 320 px) es `RECORRIDO_ACOPLE` de
+   `marca/acople.ts`. Acoplado, la animación se apaga y queda el transform
+   en línea (el mismo destino). Sin soporte o con movimiento reducido, el
+   JS mueve el logo. */
+@property --acople {
+  syntax: '*';
+  inherits: false;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .navbar[data-portada] .viajero:not([data-acoplado]) {
+      animation: acoplar linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0px 320px;
+    }
+
+    /* El nombre fijo aparece cuando el disco ya casi llegó (55 % → 100 %). */
+    .navbar[data-portada] .marcaTexto > span {
+      animation: aparecerNombre linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 176px 320px;
+    }
+  }
+}
+
+@keyframes acoplar {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: var(--acople);
+  }
+}
+
+@keyframes aparecerNombre {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Primera carga: el nombre y los enlaces aparecen tras la cortina
