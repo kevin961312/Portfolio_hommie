@@ -364,14 +364,21 @@ collections:
                 widget: image
                 required: false
                 hint: 'Opcional. Sin imagen se dibuja una portada con el título.'
-              - label: 'Encuadre de la portada (fichas)'
+              - label: 'Encuadre de la portada'
                 name: encuadre
                 widget: number
                 value_type: int
                 min: 0
                 max: 100
                 required: false
-                hint: 'Solo fichas de discos: qué parte de la portada vertical se ve en la caja de CD. 0 = arriba, 100 = abajo. Vacío = 42 (cara, manos y CD).'
+                hint: 'Qué parte de la portada vertical se ve en la caja de CD (reels) o en el digipak (carruseles). 0 = arriba, 100 = abajo. Vacío = 42 (cara, manos y CD).'
+              - label: 'Fotos del carrusel'
+                name: fotos
+                widget: number
+                value_type: int
+                min: 1
+                required: false
+                hint: 'Solo carruseles: cuántas fotos trae. Se muestra en el digipak del muro («12 fotos»). Vacío = sin el número.'
               - label: 'Descripción'
                 name: descripcion
                 widget: text

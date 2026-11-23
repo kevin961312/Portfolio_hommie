@@ -1,6 +1,8 @@
 /* Mismo centro y radio que el disco grande de la portada (ver Navbar y
    PortadaDisco): centro a 50svh en escritorio; en móvil, el borde de
-   arriba a 27svh. Como la capa es fija, el centro es de la ventana. */
+   arriba a 27svh. Como la capa es fija, el centro es de la ventana.
+   El lienzo (WebGL) lee centro y radio de `.ancla`, así que estas dos
+   variables son la única fuente de verdad. */
 .fondo {
   --radio-disco: min(13.4vw, 31svh);
   --centro-y: 50svh;
@@ -32,8 +34,37 @@
   );
 }
 
-/* Ondas: anillos del tamaño del disco que crecen despacio y se apagan,
-   uno cada 3 s. Muy tenues: acompañan, no llaman la atención. */
+/* Espectro circular. Aparece despacio (la cortina de carga lo tapa al
+   principio; al navegar ya está). */
+.lienzo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.fondo[data-lienzo] .lienzo {
+  opacity: 1;
+}
+
+/* Punto de medida (invisible). */
+.ancla {
+  position: absolute;
+  left: 50%;
+  top: var(--centro-y);
+  width: var(--radio-disco);
+  height: 0;
+  visibility: hidden;
+}
+
+/* Respaldo sin WebGL: anillos del tamaño del disco que crecen despacio y
+   se apagan, uno cada 3 s. Con el lienzo activo no se muestran. */
+.fondo[data-lienzo] .ondas {
+  display: none;
+}
+
 .ondas span {
   position: absolute;
   left: 50%;
@@ -75,5 +106,9 @@
 @media (prefers-reduced-motion: reduce) {
   .ondas {
     display: none;
+  }
+
+  .lienzo {
+    transition: none;
   }
 }

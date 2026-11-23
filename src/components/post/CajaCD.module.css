@@ -1,8 +1,15 @@
-/* Caja de CD (jewel case) de 142 × 125 mm. Medidas en % de la caja:
-   bisagra 8 %, bandeja libre hasta el 14 %, librillo cuadrado de 120 mm
-   (84,5 % del ancho y 96 % del alto) y el CD de 120 mm detrás.
-   Material sobrio: negro, filetes crema al 12 %, sombra de contacto negra;
-   sin reflejos ni brillos. */
+/* Dos objetos de la misma familia, los dos de 142 × 125 mm (así el muro
+   queda en filas parejas, como un estante):
+
+   - Caja de CD (jewel case, `data-variante='cd'`). Medidas en % de la caja:
+     bisagra 8 %, bandeja libre hasta el 14 %, librillo cuadrado de 120 mm
+     (84,5 % del ancho y 96 % del alto) y el CD de 120 mm detrás.
+     Material sobrio: negro, filetes crema al 12 %, sombra de contacto negra;
+     sin reflejos ni brillos.
+   - Digipak (`data-variante='digipak'`): estuche de cartón mate, sin
+     plástico. Pliegue del lomo a la izquierda (7 %), la portada impresa a
+     sangre en la tapa y una hoja del librillo guardada detrás.
+     Borde de papel crema muy tenue, la misma sombra neutra. */
 
 .ficha {
   display: flex;
@@ -36,7 +43,9 @@
 }
 
 /* El botón es la caja más el hueco por el que asoma el CD (14 % de la caja):
-   así el CD nunca pisa la pieza vecina. */
+   así el CD nunca pisa la pieza vecina. `cqi` y `container-type` piden
+   Safari/iOS 16 o más; antes, la caja se ve igual y el CD simplemente no asoma.
+   Sin resaltado gris al tocar en iOS (`-webkit-tap-highlight-color`). */
 .estuche {
   --asoma: 14cqi;
   position: relative;
@@ -51,6 +60,13 @@
   font: inherit;
   cursor: pointer;
   container-type: inline-size;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease-out;
+}
+
+/* Al tocarla (sobre todo en el teléfono) la pieza cede un poco antes de abrir. */
+.estuche:active {
+  transform: scale(0.985);
 }
 
 .caja {
@@ -177,18 +193,144 @@
   border: 1px solid var(--color-oro-400);
 }
 
-/* La única microinteracción: el CD sale un 14 % por la derecha, como al
-   sacarlo de la caja. Entra en 200 ms y vuelve en 140 ms. */
+/* ── Digipak ── */
+
+/* Cartón mate: negro cálido apenas levantado (la tinta sobre cartón sin
+   estucar nunca llega al negro puro). */
+.carton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radio-cartel);
+  background: color-mix(in srgb, var(--color-crema) 7%, var(--color-negro-900));
+  box-shadow: 0 12px 14px -10px rgba(0, 0, 0, 0.85);
+}
+
+/* Borde de papel: el canto del cartón cortado, crema muy tenue. */
+.carton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border: 1px solid rgba(246, 240, 220, 0.2);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Lomo plegado: una franja de cartón y el surco del pliegue (sombra de 1 px
+   y su labio claro), sin bisagra. */
+.pliegue {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 7%;
+  background: color-mix(in srgb, var(--color-crema) 10%, var(--color-negro-900));
+  box-shadow:
+    inset -1px 0 rgba(0, 0, 0, 0.55),
+    inset -2px 0 rgba(246, 240, 220, 0.08);
+}
+
+/* Tapa: la portada impresa a sangre del pliegue al borde. */
+.tapa {
+  position: absolute;
+  inset: 0 0 0 7%;
+  overflow: hidden;
+  background: var(--color-negro-900);
+}
+
+/* Acabado mate: un velo crema del 4 % levanta los negros como la tinta
+   sobre cartón. */
+.tapa::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(246, 240, 220, 0.04);
+}
+
+/* «12 fotos»: etiqueta impresa abajo, junto al pliegue. */
+.fotos {
+  position: absolute;
+  bottom: 6%;
+  left: calc(7% + 4.5%);
+  z-index: 2;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radio-cartel);
+  background: rgba(10, 10, 10, 0.84);
+  color: var(--color-crema);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-stretch: var(--ancho-creditos);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+/* Hoja del librillo en el bolsillo de la tapa: papel crema apagado, una foto
+   impresa con margen y dos renglones de pie. Por detrás, el canto de la hoja
+   siguiente. */
+.hoja {
+  position: absolute;
+  top: 4%;
+  right: 2%;
+  bottom: 4%;
+  z-index: 0;
+  width: 80%;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--color-crema) 78%, var(--color-negro-900));
+  box-shadow: 2px 1px 0 color-mix(in srgb, var(--color-crema) 55%, var(--color-negro-900));
+  transition: transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hoja::before,
+.hoja::after {
+  content: '';
+  position: absolute;
+  right: 8%;
+}
+
+.hoja::before {
+  top: 7%;
+  bottom: 22%;
+  left: 8%;
+  background: var(--color-negro-700);
+}
+
+.hoja::after {
+  bottom: 9%;
+  width: 46%;
+  height: 5%;
+  border-block: 1px solid rgba(10, 10, 10, 0.4);
+}
+
+/* La única microinteracción: el CD, o la hoja del librillo en el digipak,
+   sale un 14 % por la derecha, como al sacarlo del estuche. Entra en 200 ms
+   y vuelve en 140 ms. */
 @media (hover: hover) and (pointer: fine) {
-  .estuche:hover .cd {
+  .estuche:hover :is(.cd, .hoja) {
     transform: translateX(var(--asoma));
     transition-duration: 200ms;
   }
 }
 
-.estuche:focus-visible .cd {
+.estuche:focus-visible :is(.cd, .hoja) {
   transform: translateX(var(--asoma));
   transition-duration: 200ms;
+}
+
+/* En el teléfono no hay cursor: asoma la pieza que cruza la franja central
+   de la pantalla al hacer scroll (`data-en-foco`, de useFocoCentral). Más
+   lento que con el cursor: es un detalle que acompaña el scroll. */
+.estuche[data-en-foco] :is(.cd, .hoja) {
+  transform: translateX(var(--asoma));
+  transition-duration: 360ms;
+}
+
+@media (hover: none) {
+  .cd,
+  .hoja {
+    transition-duration: 260ms;
+  }
 }
 
 /* ── Créditos del librillo ── */
@@ -241,18 +383,23 @@
   white-space: nowrap;
 }
 
-/* Sin desplazamiento: el CD no sale y la caja se marca con un borde de 2 px. */
+/* Sin desplazamiento: ni el CD ni la hoja salen y la pieza se marca con un
+   borde de 2 px. */
 @media (prefers-reduced-motion: reduce) {
-  .cd {
+  .estuche,
+  .cd,
+  .hoja {
     transition: none;
   }
 
-  .estuche:hover .cd,
-  .estuche:focus-visible .cd {
+  .estuche:active,
+  .estuche:hover :is(.cd, .hoja),
+  .estuche:focus-visible :is(.cd, .hoja),
+  .estuche[data-en-foco] :is(.cd, .hoja) {
     transform: none;
   }
 
-  .estuche:hover .caja::after {
+  .estuche:hover :is(.caja, .carton)::after {
     border: 2px solid var(--color-oro-400);
   }
 }

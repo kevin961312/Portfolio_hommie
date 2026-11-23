@@ -23,8 +23,18 @@
   gap: 0.6rem 1.2rem;
   margin: 0 -1.5rem;
   padding: 0.75rem 1.5rem;
-  background: var(--color-negro-900);
   border-bottom: 1px solid var(--color-borde);
+  transition: background-color 0.2s;
+}
+
+/* Pegada bajo el menú: fondo sólido para tapar el muro que pasa detrás. */
+.barra[data-pegada] {
+  background: var(--color-negro-900);
+}
+
+.marcaBarra {
+  display: block;
+  height: 1px;
 }
 
 .grupo {
@@ -85,30 +95,6 @@
   background: var(--color-borde);
 }
 
-/* Etiqueta de tema de cada tarjeta. */
-.temas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.tema {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-stretch: var(--ancho-creditos);
-  color: var(--tema);
-}
-
-.tema .punto {
-  width: 6px;
-  height: 6px;
-  margin-right: 0;
-  box-shadow: none;
-}
-
 /* Orden: control segmentado. */
 .orden {
   display: flex;
@@ -142,14 +128,15 @@
   color: var(--color-text-muted);
 }
 
-/* 8 por página: 2 filas de 4 (en pantallas medianas y celular, 4 de 2). */
+/* 8 por página: 2 filas de 4 (en pantallas medianas y celular, 4 de 2).
+   Todas las piezas miden lo mismo (142 × 125 mm), así cada fila es un
+   estante parejo: la línea de cada caja se une con la de sus vecinas. */
 .muro {
   --gap-columnas: 1.25rem;
   --sobra-estante: calc(var(--gap-columnas) / 2); /* une las líneas de una fila en un estante */
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-auto-flow: dense;
-  gap: 1.5rem var(--gap-columnas);
+  gap: 2rem var(--gap-columnas);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -158,71 +145,19 @@
 .item {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.5rem;
   min-width: 0;
 }
 
-/* Video horizontal: ocupa dos columnas y su tarjeta mide lo mismo de alto
-   que una vertical de la fila (4:5 de una columna), así los títulos quedan
-   alineados. `dense` rellena el hueco si le toca caer en la última columna. */
-.item[data-horizontal] {
-  grid-column: span 2;
-  container-type: inline-size;
-}
-
-.item[data-horizontal] > :first-child {
-  height: calc((100cqw - var(--gap-columnas)) / 2 * 1.25);
-}
-
-/* Los que el filtro saca siguen montados (con su post ya cargado). */
+/* Los que el filtro saca siguen montados (solo se ocultan). */
 .muro[hidden],
 .item[hidden] {
   display: none;
 }
 
-.pie {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 0 0.2rem;
-}
-
-/* Estante: cada pieza se apoya en una línea de 1 px (la caja de CD la trae
-   en su componente; aquí la de las tarjetas, justo bajo la tarjeta). */
-.pie::before {
-  content: '';
-  position: absolute;
-  top: calc(-0.7rem - 1px);
-  right: calc(-0.2rem - var(--sobra-estante));
-  left: calc(-0.2rem - var(--sobra-estante));
-  height: 1px;
-  background: var(--color-oro-200);
-}
-
-/* Caja de CD: los créditos los pone la caja; aquí solo las cifras. */
-.item[data-caja] {
-  gap: 0.5rem;
-}
-
-/* Estante de solo cajas (filtro «Fichas de discos»): filas más juntas. */
-.muro[data-estante] {
-  row-gap: 2rem;
-}
-
-.titulo {
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.35;
-  color: #fff;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 .meta {
   display: flex;
+  margin-top: auto; /* las cifras de una fila, alineadas abajo aunque los créditos ocupen más o menos */
   align-items: center;
   gap: 0.6rem;
   font-size: 0.76rem;
@@ -349,15 +284,7 @@
   .muro {
     --gap-columnas: 0.75rem;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.1rem var(--gap-columnas);
-  }
-
-  .titulo {
-    font-size: 0.8rem;
-  }
-
-  .tema {
-    font-size: 0.75rem; /* 12 px como mínimo también en celular */
+    gap: 1.6rem var(--gap-columnas);
   }
 
   .cuenta {

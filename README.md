@@ -43,13 +43,13 @@ src/
 ├── components/          ← piezas reutilizables (ver «Componentes»)
 │   ├── index.ts         ← importa todo desde aquí
 │   ├── layout/          Navbar, Footer, EncabezadoPagina
-│   ├── marca/           LogoDisco, CortinaCarga, PortadaDisco, FondoOndas (logo tocadiscos, efecto open-rise y fondo de surcos)
+│   ├── marca/           LogoDisco, CortinaCarga, PortadaDisco, FondoOndas (logo tocadiscos, efecto open-rise y fondo de onda circular)
 │   ├── metricas/        MetricasImpacto, MetricaCard
-│   ├── post/            TarjetaPost, PortadaPost, CajaCD, PostVivo, VisorPost   (Instagram)
+│   ├── post/            TarjetaPost, PortadaPost, CajaCD (caja de CD y digipak), PostVivo, VisorPost   (Instagram)
 │   └── icons/           íconos SVG (IconInstagram, IconPlay, …)
 ├── pages/               una página por ruta (arman los componentes con los datos)
 ├── data/                logo-disco.ts (piezas del logo; no es contenido editable)
-├── hooks/               useContenido, usePerfil, useContadorAnimado (Top 20), useMediaQuery, …
+├── hooks/               useContenido, usePerfil, useContadorAnimado (Top 20), useMediaQuery, useFocoCentral (CD que asoma en el teléfono), …
 ├── lib/                 utilidades: calculos (métricas), formato, rutas, posts, instagram, perfiles
 └── types/               tipos de los datos (los del contenido salen del esquema con z.infer)
 public/                  imágenes, PDF, favicon, 404.html (SPA en GitHub Pages) y admin/ (editor)
@@ -63,7 +63,7 @@ scripts/                 validar-contenido.ts · logo/svg-a-logo.mjs (logo .ai �
 |---|---|
 | `sitio.json` | Nombre, portada (nombre + parte resaltada), profesión, contacto (WhatsApp con número e indicativo, correo, teléfono, ciudad), redes, cuentas de Instagram (usuario, nombre, iniciales), y cuenta personal. |
 | `perfiles.json` | `perfiles.principal / secundario / terciario`: `nombreCorto`, `rol`, `titular`, `sobreMi[]`, `metricas[]` (opcional), `secciones[]` y `tituloDocumento` (admite `{nombre}`). |
-| `posts.json` | `posts[]`: posts de Instagram del muro y del Top 20 (`id`, `url`, `titulo`, `tipo`, `fecha`, `likes`, `alcance`, `alcanceEstimado`, `cuenta`, `tema`, `orientacion`, `tiktok`, `portada`, `descripcion` y, en las fichas, `encuadre` opcional: altura del recorte de la portada en la caja de CD, de 0 = arriba a 100 = abajo; sin él, 42). |
+| `posts.json` | `posts[]`: posts de Instagram del muro y del Top 20 (`id`, `url`, `titulo`, `tipo`, `fecha`, `likes`, `alcance`, `alcanceEstimado`, `cuenta`, `tema`, `orientacion`, `tiktok`, `portada`, `descripcion`, `encuadre` opcional: altura del recorte de la portada en la caja de CD o el digipak, de 0 = arriba a 100 = abajo; sin él, 42; y en los carruseles `fotos` opcional: cuántas fotos trae, se ve como «12 fotos» en el digipak). |
 | `tiktok.json` | `videos[]` (`id`, `url`, `tipo`, `fecha`, `descripcion`, `reproducciones`, `likes`, `comentarios`, `compartidos`, `portada`). Hoy guarda solo los videos que no existen en Instagram; aún no tiene sección, pero alimenta las métricas de TikTok. |
 
 Cómo fluye:
@@ -177,9 +177,9 @@ Cada componente trae su `.module.css` al lado y usa las variables de color de
 
 | Componente | Qué hace | Props principales |
 |---|---|---|
-| `TarjetaPost` | Caja del muro: portada diseñada que al acercarse carga el post real (embed). | `post`, `onAbrir?`, `onTocado?`, `claveVivo?`, `ancha?` |
+| `TarjetaPost` | Tarjeta 4:5: portada diseñada que al acercarse carga el post real (embed). El muro de `/posts-instagram` ya no la usa (todo va en `CajaCD`); queda para muros de tarjetas en otros sitios. | `post`, `onAbrir?`, `onTocado?`, `claveVivo?`, `ancha?` |
 | `PortadaPost` | Portada dibujada con título, cuenta y likes (sin red). Por debajo de 273 px de ancho esconde la cabecera simulada y el pie (no bajan de 12 px). | `post`, `puesto?` |
-| `CajaCD` | Ficha de disco como caja de CD (jewel case 142 × 125 mm): bisagra, bandeja y el librillo cuadrado con la portada del reel; debajo, disco, artista y «℗ año, ciudad» sacados del pie (`creditosFicha` en `lib/posts.ts`). Al pasar el cursor o enfocarla, el CD asoma un 14 % por la derecha (200 ms); al tocarla llama a `onAbrir` (VisorPost). En el muro se usa para los posts con `tema: 'fichas'`. | `post`, `onAbrir`, `alineada?` (junto a tarjetas 4:5: se apoya abajo, en la línea del estante) |
+| `CajaCD` | Pieza del muro como objeto de tienda de discos, siempre de 142 × 125 mm (así el muro es un estante de filas parejas). **`cd`** (reels): caja de CD con bisagra, bandeja y el librillo cuadrado con la portada. **`digipak`** (carruseles y fotos): estuche de cartón mate, sin plástico, con lomo plegado, la portada impresa a sangre en la tapa, borde de papel crema tenue y la etiqueta «N fotos» (`fotos`). Debajo, los créditos: en las fichas (`tema: 'fichas'`) disco, artista y «℗ año, ciudad» (`creditosFicha` en `lib/posts.ts`); en el resto, título, tema y fecha. Al pasar el cursor o enfocarla asoma un 14 % por la derecha el CD o una hoja del librillo (200 ms); en pantallas táctiles, cuando la pieza cruza la franja central de la pantalla al hacer scroll (`useFocoCentral`: un solo IntersectionObserver para todas, `rootMargin` −30 % arriba y abajo, atributo `data-en-foco`). Con movimiento reducido no se desplaza. Al tocarla llama a `onAbrir` (VisorPost). | `post`, `onAbrir`, `variante?` (`'cd' \| 'digipak'`; sin ella, según `post.tipo`), `alineada?` (junto a tarjetas 4:5: se apoya abajo, en la línea del estante) |
 | `PostVivo` | Lo que se reproduce en la tarjeta según el post (ver «Cómo se reproduce un post»), con su estado de carga. | `post`, `interactivo?`, `onTocado?` |
 | `VisorPost` | Visor a pantalla completa para recorrer una lista de posts. | `posts`, `indice`, `onCambiar`, `onCerrar` |
 
@@ -205,7 +205,7 @@ eso `PostVivo` decide según el post:
 | Reel con `tiktok` (id del mismo video en TikTok) | El reproductor oficial `tiktok.com/player/v1/<id>` en una caja 9:16, con sus controles. No arranca solo: se pulsa play (el sonido nunca sale sin avisar). Solo se monta en la tarjeta con la que se puede interactuar (la central del Top 20, el visor); al salir de ella el iframe se destruye y el video se corta. Tocarlo pausa el avance automático del Top 20 (`onTocado`). |
 | Reel sin `tiktok` | La portada y el botón «Ver en Instagram ↗» (pestaña nueva). Sin ícono de play: no promete una reproducción que no existe. |
 | Carrusel o imagen | El embed de Instagram. Si el iframe no llega a 50 px de alto (15 s o 4 s después de cargar), cae al mismo respaldo «Ver en Instagram ↗». |
-| Tarjeta de vista previa (muro, tarjetas laterales del Top 20) | Solo la portada de los reels; los carruseles cargan su embed. |
+| Tarjeta de vista previa (`TarjetaPost`, tarjetas laterales del Top 20) | Solo la portada de los reels; los carruseles cargan su embed. |
 
 El campo `tiktok` de `contenido/posts.json` (string con el id numérico, el número
 largo al final de `tiktok.com/@usuario/video/<id>`) se llena en el editor
@@ -228,7 +228,7 @@ lleno: se emparejó cada reel de Instagram con el mismo video en TikTok.
 |---|---|---|
 | `LogoDisco` | Logo circular que gira como un vinilo a 33⅓ rpm (WAAPI); arranca acelerando, frena al pasar el cursor o tocarlo y en la primera carga sus piezas suben de izquierda a derecha. | `logo` (`LogoPiezas`), `etiqueta?`, `girar?`, `className?` |
 | `CortinaCarga` | Cortina de la primera carga: línea que se llena con las imágenes y dos franjas inclinadas que se abren. Va una vez en `App.tsx`. | `minimo?` (800 ms), `maximo?` (4000 ms) |
-| `FondoOndas` | Fondo fijo de todo el sitio: surcos de disco centrados en la pantalla y cuatro ondas muy tenues que salen de donde está el disco de la portada (12 s por onda; sin ondas con movimiento reducido). Va una vez en `App.tsx`. | — |
+| `FondoOndas` | Fondo fijo de todo el sitio: espectro de audio circular alrededor del disco de la portada (WebGL, `marca/ondaEspectro.ts`): miles de trazos radiales en amarillos y ocres con halo, movimiento muy lento, 30 fps, pausa con la pestaña oculta y un cuadro quieto con movimiento reducido. Sin WebGL quedan los surcos CSS. Va una vez en `App.tsx`. | — |
 | `PortadaDisco` | Primera pantalla de la portada: fondo de surcos que se aleja (1 → 0,95) mientras el logo sube al menú. | `children?` |
 
 En la portada, `SobreMiPage` pasa como `children` de `PortadaDisco` el «Sobre mí» (izquierda) y

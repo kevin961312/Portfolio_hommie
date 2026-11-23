@@ -175,6 +175,9 @@ export default function Navbar() {
 
   // El menú solo lista las secciones que este perfil expone.
   const itemsVisibles = navItems.filter((item) => perfil.secciones.includes(item.path));
+  /** Va gigante y apagado de fondo en la barra: en la portada, el nombre del
+      sitio; en las demás páginas, el nombre de la sección. */
+  const seccionActual = enPortada ? sitio.nombre : navItems.find((item) => item.path === pathname)?.label;
 
   return (
     <nav
@@ -183,6 +186,11 @@ export default function Navbar() {
       data-entrada={conEntrada ? fase : undefined}
       data-portada={enPortada || undefined}
     >
+      {seccionActual && (
+        <span className={styles.marcaAgua} aria-hidden="true">
+          <span key={pathname}>{seccionActual}</span>
+        </span>
+      )}
       <div className={styles.inner}>
         {/* Tres columnas: nombre | disco (centro exacto de la barra) | enlaces.
             El disco es el enlace a inicio; el nombre lo repite en texto quieto

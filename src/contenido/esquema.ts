@@ -214,8 +214,10 @@ export const esquemaPostInstagram = z.object({
   /** `'horizontal'` para videos 16:9; sin el campo, vertical 4:5. */
   orientacion: opcional(z.enum(['horizontal'], { error: 'La orientación solo puede ser horizontal o quedar vacía.' })),
   tema: opcional(z.enum(TEMAS_POST, { error: `El tema debe ser uno de: ${TEMAS_POST.join(', ')}.` })),
-  /** Fichas de discos: altura del recorte cuadrado de la portada en la caja de CD (0 = arriba, 100 = abajo). Sin el campo, 42. */
+  /** Altura del recorte de la portada en la caja de CD o el digipak (0 = arriba, 100 = abajo). Sin el campo, 42. */
   encuadre: opcional(entero('Encuadre de la portada').max(100, '«Encuadre de la portada» va de 0 (arriba) a 100 (abajo).')),
+  /** Carruseles: cuántas fotos trae. Se ve en el digipak del muro («12 fotos»). */
+  fotos: opcional(entero('Fotos del carrusel').min(1, '«Fotos del carrusel» debe ser 1 o más.')),
 });
 
 /** Post del muro: aquí el tema es obligatorio. */

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import EncabezadoPagina from '../components/layout/EncabezadoPagina';
-import TarjetaPost from '../components/post/TarjetaPost';
 import CajaCD from '../components/post/CajaCD';
 import VisorPost from '../components/post/VisorPost';
 import { IconExternalLink, IconHeart } from '../components/icons';
@@ -43,6 +42,24 @@ export default function PostsInstagramPage() {
   const [abierto, setAbierto] = useState<number | null>(null);
   const centinelaRef = useRef<HTMLDivElement>(null);
   const muroRef = useRef<HTMLUListElement>(null);
+  const barraRef = useRef<HTMLDivElement>(null);
+  const marcaBarraRef = useRef<HTMLSpanElement>(null);
+
+  /* La barra de filtros solo lleva fondo cuando está pegada bajo el menú
+     (tapa el muro que pasa por detrás); quieta, es transparente y deja ver
+     la onda del fondo. Un marcador de 1 px justo encima avisa cuándo se
+     pega: cuando sale de la pantalla por arriba. */
+  useEffect(() => {
+    const marca = marcaBarraRef.current;
+    const barra = barraRef.current;
+    if (!marca || !barra) return;
+    const observador = new IntersectionObserver(
+      ([entrada]) => barra.toggleAttribute('data-pegada', !entrada.isIntersecting && entrada.boundingClientRect.top < 64),
+      { rootMargin: '-64px 0px 0px 0px' },
+    );
+    observador.observe(marca);
+    return () => observador.disconnect();
+  }, []);
 
   /* Cambiar filtro u orden vuelve a la primera tanda y, si ya se había
      bajado, sube al inicio del muro (si no, el loader del final seguiría
@@ -95,10 +112,6 @@ export default function PostsInstagramPage() {
   // Posición de cada post en `lista` (los que el filtro saca no están).
   const posicion = useMemo(() => new Map(lista.map((p, i) => [p.url, i])), [lista]);
   const hayMas = mostrados < lista.length;
-  /* Solo fichas a la vista (filtro «Fichas de discos»): el muro es un estante
-     de cajas de CD. Mezcladas con reels y carruseles, cada caja ocupa el
-     hueco 4:5 de una tarjeta y se apoya abajo, en la misma línea. */
-  const soloFichas = lista.length > 0 && lista.every((p) => p.tema === 'fichas');
 
   /* Scroll infinito: cuando el loader del final se acerca a la pantalla,
      se suma otra tanda tras una pausa breve. Se vuelve a observar en cada
@@ -133,7 +146,8 @@ export default function PostsInstagramPage() {
         lead="Reels y carruseles producidos para redes sociales. Toca cualquiera para verlo en grande: ahí se reproduce el reel o se pasa el carrusel."
       />
 
-      <div className={styles.barra}>
+      <span ref={marcaBarraRef} className={styles.marcaBarra} aria-hidden="true" />
+      <div ref={barraRef} className={styles.barra}>
         <div className={styles.grupo} role="group" aria-label="Formato">
           {TIPOS.map((t) => (
             <button
@@ -181,23 +195,23 @@ export default function PostsInstagramPage() {
 
       {lista.length === 0 && <p className={styles.vacio}>No hay publicaciones con estos filtros.</p>}
 
-      {/* Las tarjetas nunca cambian de lugar en el DOM ni se desmontan:
-          mover o quitar un iframe hace que el navegador lo recargue. El
-          orden se aplica con `order` del grid; el filtro y las tandas aún
-          no mostradas solo las ocultan, así los posts ya cargados siguen
-          listos al cambiar de vista. */}
-      <ul ref={muroRef} className={styles.muro} hidden={lista.length === 0} data-estante={soloFichas || undefined}>
+      {/* El muro es un estante: todo es un objeto de 142 × 125 mm (los
+          reels, cajas de CD; los carruseles y las fotos, digipaks; los
+          horizontales también, con la portada recortada en el estuche), así
+          las filas quedan parejas. Las piezas nunca cambian de lugar en el
+          DOM ni se desmontan: el orden se aplica con `order` del grid y el
+          filtro y las tandas aún no mostradas solo las ocultan. */}
+      <ul ref={muroRef} className={styles.muro} hidden={lista.length === 0}>
         {postsInstagram.map((p) => {
           const i = posicion.get(p.url);
           const visible = i !== undefined && i < mostrados;
-          const horizontal = p.orientacion === 'horizontal';
           const abrir = () => i !== undefined && setAbierto(i);
           const meta = (
             <div className={styles.meta}>
               <span className={styles.likes}>
                 <IconHeart size={13} /> {formatearMetrica(p.likes ?? 0, true)}
               </span>
-              <span className={styles.cuenta}>{p.tipo === 'video' ? 'Reel' : 'Carrusel'} · @{p.cuenta ?? 'instagram'}</span>
+              <span className={styles.cuenta}>{p.tipo === 'video' ? 'Reel' : p.tipo === 'carrusel' ? 'Carrusel' : 'Foto'} · @{p.cuenta ?? 'instagram'}</span>
               <a
                 href={p.url}
                 target="_blank"
@@ -209,35 +223,10 @@ export default function PostsInstagramPage() {
               </a>
             </div>
           );
-          if (p.tema === 'fichas') {
-            return (
-              <li key={p.url} className={`${styles.item} revelar`} data-caja hidden={!visible} style={i === undefined ? undefined : { order: i }}>
-                <CajaCD post={p} onAbrir={abrir} alineada={!soloFichas} />
-                {meta}
-              </li>
-            );
-          }
           return (
-            <li
-              key={p.url}
-              className={`${styles.item} revelar`}
-              hidden={!visible}
-              data-horizontal={horizontal || undefined}
-              style={i === undefined ? undefined : { order: i }}
-            >
-              <TarjetaPost post={p} ancha={horizontal} onAbrir={abrir} />
-              <div className={styles.pie}>
-                <span className={styles.temas}>
-                  {TEMAS.filter((t) => t.id === p.tema).map((t) => (
-                    <span key={t.id} className={styles.tema} data-tema={t.id}>
-                      <span className={styles.punto} aria-hidden="true" />
-                      {t.etiqueta}
-                    </span>
-                  ))}
-                </span>
-                <p className={styles.titulo}>{tituloPost(p)}</p>
-                {meta}
-              </div>
+            <li key={p.url} className={`${styles.item} revelar`} hidden={!visible} style={i === undefined ? undefined : { order: i }}>
+              <CajaCD post={p} onAbrir={abrir} />
+              {meta}
             </li>
           );
         })}

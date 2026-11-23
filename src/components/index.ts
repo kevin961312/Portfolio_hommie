@@ -30,6 +30,7 @@ export { default as MetricaCard } from './metricas/MetricaCard';
 export { default as TarjetaPost } from './post/TarjetaPost';
 export { default as PortadaPost } from './post/PortadaPost';
 export { default as CajaCD } from './post/CajaCD';
+export type { VarianteCaja } from './post/CajaCD';
 export { default as PostVivo } from './post/PostVivo';
 export { default as VisorPost } from './post/VisorPost';
 
