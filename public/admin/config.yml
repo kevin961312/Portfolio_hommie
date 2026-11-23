@@ -1,0 +1,408 @@
+# ──────────────────────────────────────────────────────────────────────
+# Editor de contenido (Sveltia CMS) · Los Discos del Homie
+#
+# Edita SOLO los datos de contenido/*.json. El diseño, los colores y las
+# secciones viven en el código y no se tocan desde aquí.
+#
+# Los campos copian el esquema de src/contenido/esquema.ts (Zod). Si
+# cambias uno, cambia el otro: al publicar, el workflow corre
+# `npm run validar` y rechaza el cambio si no coinciden.
+# ──────────────────────────────────────────────────────────────────────
+
+backend:
+  name: github
+  # Repo del sitio: el editor guarda aquí cada cambio (rama main).
+  repo: kevin961312/Portfolio_hommie
+  branch: main
+  commit_messages:
+    create: 'Contenido: crea {{collection}} «{{slug}}» (editor)'
+    update: 'Contenido: actualiza {{collection}} «{{slug}}» (editor)'
+    delete: 'Contenido: borra {{collection}} «{{slug}}» (editor)'
+    uploadMedia: 'Contenido: sube {{path}} (editor)'
+    deleteMedia: 'Contenido: borra {{path}} (editor)'
+
+# Fotos que se suben desde el editor (portadas de posts, etc.).
+media_folder: public/images/subidas
+public_folder: /images/subidas
+
+# Al guardar, no escribir los campos opcionales vacíos ("" o null) y
+# mantener el JSON con 2 espacios, igual que en el repo.
+output:
+  omit_empty_optional_fields: true
+  json:
+    indent_style: space
+    indent_size: 2
+
+# ── Colecciones ──────────────────────────────────────────────────────
+
+collections:
+  - name: datos
+    label: 'Datos y contacto'
+    format: json
+    editor: { preview: false }
+    files:
+      - name: sitio
+        label: 'Datos del sitio y contacto'
+        file: contenido/sitio.json
+        fields:
+          - label: 'Nombre del sitio'
+            name: nombre
+            widget: string
+            hint: 'Se ve en el menú, el pie de página y la pestaña.'
+          - label: 'Nombre en la portada'
+            name: portada
+            widget: object
+            fields:
+              - { label: 'Primera parte (en blanco)', name: nombre, widget: string }
+              - { label: 'Segunda parte (resaltada)', name: apellido, widget: string }
+          - label: 'Profesión'
+            name: profesion
+            widget: string
+            hint: 'Acompaña al nombre en el pie de página.'
+          - label: 'Contacto'
+            name: contacto
+            widget: object
+            hint: 'Lo que dejes vacío no se muestra en el sitio.'
+            fields:
+              - label: 'WhatsApp'
+                name: whatsapp
+                widget: object
+                fields:
+                  - label: 'Número'
+                    name: numero
+                    widget: string
+                    required: false
+                    hint: 'Como quieres que se vea, p. ej. 311 830 1493.'
+                    pattern: ['^[0-9 ]+$', 'Solo números y espacios.']
+                  - label: 'Indicativo del país'
+                    name: indicativo
+                    widget: string
+                    required: false
+                    default: '57'
+                    hint: '57 = Colombia. Sirve para armar el enlace de WhatsApp.'
+                    pattern: ['^[0-9]{1,4}$', 'Solo números.']
+              - label: 'Correo'
+                name: correo
+                widget: string
+                required: false
+                pattern: ['^[^@\s]+@[^@\s]+\.[^@\s]+$', 'Escribe un correo válido.']
+              - label: 'Teléfono'
+                name: telefono
+                widget: string
+                required: false
+                pattern: ['^[0-9 +]+$', 'Solo números, espacios y +.']
+              - label: 'Ciudad'
+                name: ciudad
+                widget: string
+                required: false
+          - label: 'Redes'
+            name: redes
+            widget: list
+            hint: 'Aparecen en el contacto de la portada, en este orden.'
+            summary: '{{fields.nombre}} · @{{fields.usuario}}'
+            fields:
+              - label: 'Tipo (ícono)'
+                name: tipo
+                widget: select
+                options:
+                  - { label: 'Instagram', value: instagram }
+                  - { label: 'TikTok', value: tiktok }
+                  - { label: 'Otra', value: otra }
+              - { label: 'Nombre visible', name: nombre, widget: string }
+              - label: 'Usuario'
+                name: usuario
+                widget: string
+                hint: 'Sin @.'
+                pattern: ['^[^@\s]+$', 'Escribe el usuario sin @ y sin espacios.']
+              - label: 'Enlace'
+                name: url
+                widget: string
+                required: false
+                hint: 'Vacío = se muestra el usuario sin enlace.'
+                pattern: ['^https?://\S+$', 'El enlace debe empezar por https://']
+          - label: 'Cuentas de Instagram'
+            name: cuentas
+            widget: list
+            min: 1
+            hint: 'Cuentas que aparecen en los posts. Sus colores se definen en el diseño.'
+            summary: '{{fields.nombre}} · @{{fields.usuario}}'
+            fields:
+              - label: 'Usuario'
+                name: usuario
+                widget: string
+                hint: 'Sin @.'
+                pattern: ['^[^@\s]+$', 'Escribe el usuario sin @ y sin espacios.']
+              - { label: 'Nombre visible', name: nombre, widget: string }
+              - label: 'Iniciales'
+                name: iniciales
+                widget: string
+                hint: 'Hasta 3 letras para el avatar de las portadas.'
+                pattern: ['^\S{1,3}$', 'Entre 1 y 3 letras.']
+          - label: 'Cuenta personal'
+            name: cuentaPersonal
+            widget: string
+            hint: 'Usuario (de la lista de cuentas) cuyo color usa el sitio por defecto.'
+
+  - name: perfiles
+    label: 'Sobre mí y métricas'
+    format: json
+    editor: { preview: false }
+    files:
+      - name: perfiles
+        label: 'Perfiles: Sobre mí, métricas y secciones'
+        file: contenido/perfiles.json
+        fields:
+          - label: 'Perfiles'
+            name: perfiles
+            widget: object
+            hint: 'Tres versiones del portafolio: sin parámetro o ?perf=uno (principal), ?perf=dos y ?perf=tres.'
+            fields:
+              - label: 'Perfil principal (?perf=uno)'
+                name: principal
+                widget: object
+                # Ancla: los otros dos perfiles reutilizan estos mismos campos.
+                fields: &campos-perfil
+                - label: 'Nombre corto del perfil'
+                  name: nombreCorto
+                  widget: string
+                  hint: 'Solo para ti: identifica esta versión del portafolio.'
+                - label: 'Rol'
+                  name: rol
+                  widget: string
+                  hint: 'Línea pequeña sobre tu nombre, p. ej. «Creador de contenido · Rap · Bogotá».'
+                - label: 'Titular'
+                  name: titular
+                  widget: string
+                  hint: 'Frase corta debajo de tu nombre.'
+                - label: 'Sobre mí'
+                  name: sobreMi
+                  widget: list
+                  hint: 'Cada elemento es un párrafo. Puedes agregar, quitar o reordenar.'
+                  min: 1
+                  field: { label: 'Párrafo', name: parrafo, widget: text }
+                - label: 'Métricas'
+                  name: metricas
+                  widget: list
+                  required: false
+                  hint: 'Tarjetas de cifras bajo «Sobre mí». Cada una usa un número escrito a mano o un cálculo automático.'
+                  summary: '{{fields.etiqueta}}'
+                  fields:
+                    - label: 'Identificador'
+                      name: id
+                      widget: string
+                      hint: 'Una palabra única, sin espacios (p. ej. seguidores-tiktok). No se ve en el sitio.'
+                      pattern: ['^\S+$', 'Sin espacios.']
+                    - label: 'Título de la tarjeta'
+                      name: etiqueta
+                      widget: string
+                    - label: 'Número escrito a mano'
+                      name: valor
+                      widget: number
+                      value_type: int
+                      min: 0
+                      required: false
+                      hint: 'Para cifras que el sitio no puede contar solo (seguidores, vistas en TikTok…). Si lo llenas, manda sobre el cálculo automático.'
+                    - label: 'Cálculo automático'
+                      name: calculo
+                      widget: select
+                      required: false
+                      options:
+                      - { label: 'Número de posts de Instagram', value: totalPosts }
+                      - { label: 'Número de reels', value: totalReels }
+                      - { label: 'Número de carruseles', value: totalCarruseles }
+                      - { label: 'Interacciones totales (suma de likes)', value: totalInteracciones }
+                      - { label: 'Mediana de interacciones por post', value: medianaInteracciones }
+                      - { label: 'Post con más interacciones', value: picoInteracciones }
+                      - { label: 'Promedio de interacciones de los reels', value: mediaReels }
+                      - { label: 'Carrusel con más interacciones', value: picoCarrusel }
+                      - { label: 'Número de videos de TikTok', value: totalVideosTiktok }
+                      - { label: 'Reproducciones totales en TikTok', value: totalReproduccionesTiktok }
+                      - { label: 'Likes totales en TikTok', value: totalLikesTiktok }
+                      - { label: 'Número de fichas de discos', value: totalFichas }
+                      - { label: 'Pieza con más alcance', value: picoAlcance }
+                      hint: 'Si no escribes un número, el sitio lo cuenta solo con tus posts y se actualiza al agregar nuevos.'
+                    - label: 'Detalle'
+                      name: detalle
+                      widget: string
+                      hint: 'Línea de apoyo. Puede llevar cifras automáticas entre llaves, p. ej. «{totalReels} reels · {totalCarruseles} carruseles».'
+                    - label: 'Categoría (ícono)'
+                      name: categoria
+                      widget: select
+                      options:
+                        - { label: 'Alcance (ojo)', value: alcance }
+                        - { label: 'Publicaciones', value: publicaciones }
+                        - { label: 'Interacciones (corazón)', value: interacciones }
+                        - { label: 'Destacado (estrella)', value: destacado }
+                    - label: 'Sufijo'
+                      name: sufijo
+                      widget: string
+                      required: false
+                      hint: 'Opcional, pegado al número (p. ej. +).'
+                    - label: 'Número compacto'
+                      name: compacto
+                      widget: boolean
+                      required: false
+                      hint: 'Activado: 287335 se ve como «287K».'
+                - label: 'Secciones visibles'
+                  name: secciones
+                  widget: select
+                  multiple: true
+                  min: 1
+                  hint: 'Qué páginas aparecen en el menú de este perfil. La portada siempre debe estar.'
+                  options:
+                    - { label: 'Portada (Sobre mí)', value: '/' }
+                    - { label: 'Top 20', value: '/top-20' }
+                    - { label: 'Posts de Instagram', value: '/posts-instagram' }
+                - label: 'Título de la pestaña'
+                  name: tituloDocumento
+                  widget: string
+                  hint: 'Texto de la pestaña del navegador. {nombre} se cambia por el nombre del sitio.'
+              - { label: 'Perfil secundario (?perf=dos)', name: secundario, widget: object, collapsed: true, fields: *campos-perfil }
+              - { label: 'Perfil terciario (?perf=tres)', name: terciario, widget: object, collapsed: true, fields: *campos-perfil }
+
+  - name: publicaciones
+    label: 'Posts y TikTok'
+    format: json
+    editor: { preview: false }
+    files:
+      - name: posts
+        label: 'Posts de Instagram (muro y Top 20)'
+        file: contenido/posts.json
+        fields:
+          - label: 'Posts'
+            name: posts
+            widget: list
+            hint: 'El Top 20 son los 20 con más alcance; se ordena solo.'
+            summary: '{{fields.fecha}} · {{fields.titulo}}'
+            fields:
+              - label: 'Identificador'
+                name: id
+                widget: uuid
+                hint: 'Se crea solo.'
+              - label: 'Enlace del post'
+                name: url
+                widget: string
+                hint: 'Cópialo desde Instagram: https://www.instagram.com/p/…/'
+                pattern: ['^https://(www\.)?instagram\.com/(p|reel|tv)/[A-Za-z0-9_-]+/?', 'Pega el enlace completo del post de Instagram.']
+              - label: 'Título'
+                name: titulo
+                widget: string
+                required: false
+                hint: 'Vacío = «Reel/Carrusel para Instagram».'
+              - label: 'Tipo'
+                name: tipo
+                widget: select
+                options:
+                  - { label: 'Carrusel', value: carrusel }
+                  - { label: 'Reel (video)', value: video }
+                  - { label: 'Imagen', value: imagen }
+              - &campo-fecha
+                label: 'Fecha'
+                name: fecha
+                widget: datetime
+                format: 'YYYY-MM-DD'
+                date_format: 'YYYY-MM-DD'
+                time_format: false
+                picker_utc: true
+              - label: 'Interacciones (likes)'
+                name: likes
+                widget: number
+                value_type: int
+                min: 0
+                required: false
+                hint: 'Número al día de hoy. Suma en las métricas automáticas.'
+              - label: 'Alcance'
+                name: alcance
+                widget: number
+                value_type: int
+                min: 0
+                required: false
+                hint: 'Reproducciones de TikTok si la pieza también está allí; si no, un estimado. El Top 20 se ordena por este número (si falta, por los likes).'
+              - label: 'El alcance es un estimado'
+                name: alcanceEstimado
+                widget: boolean
+                required: false
+                hint: 'Actívalo si el alcance no es una cifra medida: se muestra con «~» y «alcance estimado».'
+              - label: 'Cuenta'
+                name: cuenta
+                widget: relation
+                collection: datos
+                file: sitio
+                value_field: 'cuentas.*.usuario'
+                search_fields: ['cuentas.*.usuario', 'cuentas.*.nombre']
+                display_fields: ['cuentas.*.nombre']
+                hint: 'Cuenta que lo publicó. Si no aparece, agrégala primero en «Datos y contacto → Cuentas».'
+                required: false
+              - label: 'Tema'
+                name: tema
+                widget: select
+                hint: 'Filtro del muro de posts.'
+                options:
+                  - { label: 'Fichas de discos', value: fichas }
+                  - { label: 'Recomendaciones', value: recom }
+                  - { label: 'Festivales', value: fest }
+                  - { label: 'Eventos y conciertos', value: eventos }
+                  - { label: 'Entrevistas', value: entrev }
+                  - { label: 'Colaboraciones', value: colab }
+                  - { label: 'Retratos y cultura', value: retratos }
+              - label: 'ID del video en TikTok'
+                name: tiktok
+                widget: string
+                required: false
+                pattern: ['^\d{15,25}$', 'Solo los números del final del enlace de TikTok (después de /video/).']
+                hint: 'ID del mismo video en TikTok, para reproducirlo en el sitio. Es el número largo al final del enlace del video (tiktok.com/@usuario/video/NÚMERO). Solo sirve en reels: si lo dejas vacío, el reel muestra su portada y un botón «Ver en Instagram».'
+              - &campo-orientacion
+                label: 'Orientación'
+                name: orientacion
+                widget: select
+                required: false
+                options:
+                  - { label: 'Horizontal (16:9)', value: horizontal }
+                hint: 'Déjalo vacío si es vertical (lo normal en Instagram).'
+              - label: 'Imagen de portada'
+                name: portada
+                widget: image
+                required: false
+                hint: 'Opcional. Sin imagen se dibuja una portada con el título.'
+              - label: 'Encuadre de la portada (fichas)'
+                name: encuadre
+                widget: number
+                value_type: int
+                min: 0
+                max: 100
+                required: false
+                hint: 'Solo fichas de discos: qué parte de la portada vertical se ve en la caja de CD. 0 = arriba, 100 = abajo. Vacío = 42 (cara, manos y CD).'
+              - label: 'Descripción'
+                name: descripcion
+                widget: text
+                required: false
+
+      - name: tiktok
+        label: 'Videos de TikTok'
+        file: contenido/tiktok.json
+        fields:
+          - label: 'Videos'
+            name: videos
+            widget: list
+            hint: 'Preparado para cargar los videos de TikTok; aún no tienen sección en el sitio, pero ya suman en las métricas automáticas de TikTok.'
+            summary: '{{fields.fecha}} · {{fields.descripcion}}'
+            fields:
+              - { label: 'Identificador', name: id, widget: uuid, hint: 'Se crea solo.' }
+              - label: 'Enlace del video'
+                name: url
+                widget: string
+                pattern: ['^https://(www\.|vm\.)?tiktok\.com/', 'Pega el enlace completo del video de TikTok.']
+              - label: 'Tipo'
+                name: tipo
+                widget: select
+                options:
+                  - { label: 'Video', value: video }
+                  - { label: 'Carrusel de fotos', value: carrusel }
+              - *campo-fecha
+              - { label: 'Descripción', name: descripcion, widget: text, required: false }
+              - { label: 'Reproducciones', name: reproducciones, widget: number, value_type: int, min: 0, required: false }
+              - { label: 'Likes', name: likes, widget: number, value_type: int, min: 0, required: false }
+              - { label: 'Comentarios', name: comentarios, widget: number, value_type: int, min: 0, required: false }
+              - { label: 'Compartidos', name: compartidos, widget: number, value_type: int, min: 0, required: false }
+              - { label: 'Portada', name: portada, widget: image, required: false }
+

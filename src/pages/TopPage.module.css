@@ -1,0 +1,877 @@
+/* ── Escena ─────────────────────────────────────────────────── */
+.escena {
+  --texto-suave: rgba(255, 255, 255, 0.72);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: calc(100dvh - 64px);
+  min-height: 560px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  row-gap: 0.9rem;
+  padding: 0.75rem max(1.5rem, calc((100% - 1150px) / 2)) 1rem;
+  /* Transparente: se ve el fondo fijo de surcos y ondas (FondoOndas). */
+  background: transparent;
+  color: #fff;
+  transition: --c1 0.9s ease, --c2 0.9s ease;
+}
+
+.fondo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Número gigante del puesto, de fondo. */
+.fondoNumero {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -55%;
+  font-size: min(70vh, 60vw);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.08em;
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.07);
+  animation: aparecerNumero 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes aparecerNumero {
+  from {
+    opacity: 0;
+    scale: 0.85;
+  }
+}
+
+/* ── Barras de progreso (historias) ─────────────────────────── */
+.segmentos {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 4px;
+  transition: opacity 0.3s;
+}
+
+.segmentos[data-oculto] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmento {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.carril {
+  display: block;
+  height: 4px;
+  border-radius: var(--radio-sm);
+  background: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.relleno {
+  display: block;
+  height: 100%;
+  background: #fff;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.segmento[data-estado='visto'] .relleno {
+  transform: none;
+}
+
+.segmento[data-estado='activo'] .relleno {
+  animation-name: llenar;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes llenar {
+  to {
+    transform: none;
+  }
+}
+
+/* ── Carrusel 3D de portadas ────────────────────────────────── */
+/* Cada tarjeta se ubica según su distancia a la central (--offset);
+   cambiar de puesto solo cambia esa variable y la transición mueve
+   todo el carrusel. Las medidas salen del tamaño del contenedor. */
+.carrusel {
+  grid-row: 2;
+  position: relative;
+  container-type: size;
+  perspective: 1400px;
+  min-height: 0;
+}
+
+.tarjeta {
+  --alto: min(94cqh, 118cqw, 675px);
+  --ancho: calc(var(--alto) * 0.8);
+  --paso: calc(var(--ancho) * 0.74);
+  container-type: inline-size;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--ancho);
+  height: var(--alto);
+  margin: calc(var(--alto) / -2) 0 0 calc(var(--ancho) / -2);
+  border-radius: var(--radio);
+  transform: translateX(calc(var(--offset) * var(--paso))) translateZ(calc(var(--distancia) * -170px))
+    rotateY(calc(var(--offset) * -26deg));
+  z-index: calc(10 - var(--distancia));
+  opacity: calc(1 - var(--distancia) * 0.3);
+  filter: brightness(calc(1 - var(--distancia) * 0.22));
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.85);
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.7s, filter 0.7s, width 0.45s ease,
+    height 0.45s ease, margin 0.45s ease;
+}
+
+.tarjeta[data-oculta] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tarjeta[data-centro] {
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+/* ── Podio del inicio ── */
+/* Las mismas tarjetas del carrusel, en abanico: el #1 al frente y el #2
+   y el #3 abiertos a los lados. Al empezar, la transición de transform
+   las lleva a su lugar en el carrusel. */
+.carrusel[data-podio] .tarjeta {
+  --alto: min(80cqh, 70cqw);
+  animation: entrarPodio 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+.carrusel[data-podio] .tarjeta[data-lugar='1'] {
+  z-index: 3;
+  transform: none;
+  opacity: 1;
+  filter: none;
+}
+
+.carrusel[data-podio] .tarjeta[data-lugar='2'] {
+  z-index: 2;
+  transform: translateX(calc(var(--ancho) * -0.5)) rotate(-11deg) scale(0.84);
+  opacity: 1;
+  filter: brightness(0.85);
+  animation-delay: 0.12s;
+}
+
+.carrusel[data-podio] .tarjeta[data-lugar='3'] {
+  z-index: 1;
+  transform: translateX(calc(var(--ancho) * 0.5)) rotate(11deg) scale(0.84);
+  opacity: 1;
+  filter: brightness(0.85);
+  animation-delay: 0.2s;
+}
+
+.carrusel[data-podio] .tarjeta:not([data-lugar]) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes entrarPodio {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+  }
+}
+
+/* Las tarjetas de los lados (y las del podio) llevan a esa pieza. La
+   central no lleva capa: los toques van directo al post. */
+.capaIr {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 0;
+  border: none;
+  border-radius: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.capaPuesto {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  top: 12px;
+  left: 12px;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radio-cartel);
+  background: linear-gradient(135deg, var(--c1), color-mix(in srgb, var(--c1) 55%, var(--c2)));
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Info de la pieza activa ────────────────────────────────── */
+.info {
+  grid-row: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem 2.5rem;
+}
+
+.info > * {
+  animation: subir 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.info > :nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+
+.infoTexto {
+  min-width: 0;
+  max-width: 640px;
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--texto-suave);
+}
+
+.puesto {
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-stretch: var(--ancho-titulo);
+  color: #fff;
+}
+
+.chip {
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radio-cartel);
+  background: linear-gradient(135deg, var(--c1), color-mix(in srgb, var(--c1) 55%, var(--c2)));
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.cuenta {
+  font-weight: 700;
+  color: #fff;
+}
+
+.titulo {
+  /* Título del post en minúsculas y de 20 a 30 px: Archivo ancho en negrita
+     (Ultra a ese tamaño y en minúsculas se ve de cartel de feria). */
+  font-size: clamp(1.25rem, 2.4vw, 1.9rem);
+  font-weight: 800;
+  font-stretch: var(--ancho-titulo);
+  line-height: 1.15;
+  text-wrap: balance;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Línea de lanzamiento de las fichas, como en el librillo de un CD. Crema
+   atenuada: el latón no llega a AA sobre el gris de la escena. */
+.lanzamiento {
+  margin-top: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-stretch: var(--ancho-creditos);
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-suave);
+}
+
+.infoLikes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.likes {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* Contador que cambia en vivo: Archivo con cifras tabulares (Ultra no las
+     tiene y el corazón bailaría mientras cuenta). */
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  font-weight: 800;
+  font-stretch: var(--ancho-titulo);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.likes svg {
+  width: 0.85em;
+  height: 0.85em;
+  fill: var(--c2);
+  stroke: var(--c2);
+  animation: latido 1.3s ease-in-out infinite;
+}
+
+.likesEtiqueta {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--texto-suave);
+}
+
+@keyframes latido {
+  0%,
+  100% {
+    scale: 1;
+  }
+  15% {
+    scale: 1.22;
+  }
+  30% {
+    scale: 1;
+  }
+}
+
+.comparacion {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-width: 260px;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+.comparacionBarra {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--radio-sm);
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.comparacionBarra span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radio-sm);
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  transform-origin: left;
+  animation: crecer 1s 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes crecer {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.botonPrincipal,
+.botonSecundario,
+.empezar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: var(--radio-cartel);
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.botonPrincipal {
+  min-height: 42px;
+  padding: 0.55rem 1.1rem;
+  border: none;
+  background: #fff;
+  color: var(--color-negro-800);
+  font-size: 0.88rem;
+}
+
+.botonSecundario {
+  min-height: 42px;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: #fff;
+  font-size: 0.88rem;
+}
+
+.botonPrincipal:hover,
+.empezar:hover {
+  transform: translateY(-2px);
+}
+
+.botonSecundario:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* ── Controles ──────────────────────────────────────────────── */
+.controles {
+  grid-row: 4;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.control {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radio-cartel);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: var(--color-negro-700);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.control:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.control:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.contador {
+  min-width: 4.2em;
+  text-align: center;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.tira {
+  position: relative;
+  display: flex;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+  margin: 0 0 0 0.75rem;
+  padding: 0.2rem;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tira::-webkit-scrollbar {
+  display: none;
+}
+
+.tiraBoton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 54px;
+  padding: 0.35rem 0.45rem;
+  border-radius: var(--radio-cartel);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--texto-suave);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tiraBoton:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.tiraBoton[aria-current='true'] {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--c1), color-mix(in srgb, var(--c1) 55%, var(--c2)));
+  color: #fff;
+}
+
+.tiraPuesto {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.tiraLikes {
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+/* ── Inicio y cierre ────────────────────────────────────────── */
+.escena[data-modo='inicio'] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 3rem;
+}
+
+.escena[data-modo='inicio'] .carrusel {
+  grid-column: 1;
+  grid-row: 2 / span 2;
+}
+
+.portadaFin {
+  grid-column: 1 / -1;
+  grid-row: 2 / span 2;
+  align-self: center;
+}
+
+.inicioTexto {
+  grid-column: 2;
+  grid-row: 2 / span 2;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.inicioTexto > * {
+  animation: subir 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.inicioTexto > :nth-child(2) { animation-delay: 0.08s; }
+.inicioTexto > :nth-child(3) { animation-delay: 0.16s; }
+.inicioTexto > :nth-child(4) { animation-delay: 0.24s; }
+.inicioTexto > :nth-child(5) { animation-delay: 0.32s; }
+
+/* Cuentas bajo el título, como créditos (antes, etiqueta en mayúsculas encima). */
+.creditos {
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-stretch: var(--ancho-creditos);
+  color: var(--texto-suave);
+}
+
+/* «TOP 20» y el cierre en Ultra, en ámbar y de un solo color. El h1 lleva el
+   sobreimpreso de sus reels (contorno negro + sombra dura); el cierre (h2), sólido. */
+.inicioTitulo,
+.finTitulo {
+  font-family: var(--fuente-display);
+  font-weight: 400;
+  line-height: var(--interlineado-display);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  color: var(--color-display);
+}
+
+.inicioTitulo {
+  font-size: clamp(3.5rem, 8vw, 7.5rem);
+  -webkit-text-stroke: var(--trazo-display) var(--color-negro-950);
+  paint-order: stroke fill;
+  text-shadow: var(--sombra-display);
+}
+
+
+.inicioLead {
+  max-width: 520px;
+  font-size: clamp(0.95rem, 1.4vw, 1.12rem);
+  line-height: 1.55;
+  color: var(--texto-suave);
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radio);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.datoValor {
+  /* Cifra en Ultra (alineada a la izquierda: al contar solo se mueve su borde derecho). */
+  font-family: var(--fuente-display);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-display);
+}
+
+.datoEtiqueta {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.empezar {
+  min-height: 52px;
+  padding: 0.9rem 1.6rem;
+  border: none;
+  background: var(--color-accion);
+  color: var(--color-sobre-accion);
+  font-size: 1.02rem;
+}
+
+.portadaFin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  text-align: center;
+}
+
+.finTitulo {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  text-wrap: balance;
+}
+
+.finAcciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Pista bajo el botón de empezar ── */
+.pista {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+/* ── Celular: feed vertical, una pieza por pantalla ─────────── */
+.escena[data-modo='movil'] {
+  display: block;
+  min-height: 0;
+  padding: 0;
+}
+
+.escena[data-modo='movil'] .segmentos {
+  position: absolute;
+  top: 0.4rem;
+  left: 1rem;
+  right: 3.4rem;
+  z-index: 5;
+}
+
+.pausaMovil {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.9rem;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radio-cartel);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: var(--color-negro-700);
+  color: #fff;
+}
+
+.pausaMovil::before {
+  content: '';
+  position: absolute;
+  inset: -5px; /* objetivo táctil de 44 px */
+}
+
+/* El scroll engancha una pantalla por vez, como los Reels. */
+.feed {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+
+.feed::-webkit-scrollbar {
+  display: none;
+}
+
+.pantalla {
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  padding: 2.6rem 1rem 1rem;
+}
+
+/* La tarjeta ocupa todo el alto libre sin salirse del 4:5. */
+.marcoMovil {
+  position: relative;
+  container-type: size;
+  min-height: 0;
+}
+
+.tarjetaMovil {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: min(100cqw, 80cqh);
+  height: min(125cqw, 100cqh);
+  border-radius: var(--radio);
+  box-shadow: 0 30px 70px -25px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.pantalla .info {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.pantalla .info > * {
+  animation: none;
+}
+
+.pantalla .titulo {
+  font-size: 1.08rem;
+}
+
+.pantalla .infoLikes {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pantalla .likes {
+  font-size: 1.55rem;
+}
+
+.pantalla .comparacion {
+  display: none;
+}
+
+.pantalla .botonSecundario {
+  min-height: 36px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+/* Inicio y cierre dentro del feed. */
+.pantalla .inicioTexto,
+.pantalla .portadaFin {
+  grid-column: 1;
+  grid-row: auto;
+  gap: 0.7rem;
+}
+
+.pantalla .portadaFin {
+  grid-row: 1 / -1;
+}
+
+.pantalla .inicioTitulo {
+  font-size: 3.6rem;
+}
+
+.pantalla .datoValor {
+  font-size: 1.75rem; /* 28 px: el mínimo de Ultra */
+}
+
+.pantalla .dato {
+  padding: 0.6rem 0.75rem;
+}
+
+.pantalla .empezar {
+  width: 100%;
+}
+
+.podioMovil {
+  position: relative;
+  container-type: size;
+  min-height: 150px;
+}
+
+.podioMovil .podioCarta {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 88cqh;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radio);
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.9);
+  animation: entrarPodio 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+.podioMovil .podioCarta[data-lugar='1'] {
+  z-index: 3;
+  height: 98cqh;
+  transform: translate(-50%, -50%);
+}
+
+.podioMovil .podioCarta[data-lugar='2'] {
+  z-index: 2;
+  transform: translate(-100%, -50%) rotate(-10deg) scale(0.9);
+  filter: brightness(0.85);
+  animation-delay: 0.12s;
+}
+
+.podioMovil .podioCarta[data-lugar='3'] {
+  z-index: 1;
+  transform: translate(0%, -50%) rotate(10deg) scale(0.9);
+  filter: brightness(0.85);
+  animation-delay: 0.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fondoNumero,
+  .info > *,
+  .inicioTexto > *,
+  .carrusel[data-podio] .tarjeta,
+  .podioMovil .podioCarta,
+  .likes svg,
+  .comparacionBarra span {
+    animation: none;
+  }
+
+  /* Sin animación de la barra no hay avance automático. */
+  .segmento[data-estado='activo'] .relleno {
+    animation: none;
+  }
+
+  .tarjeta {
+    transition: none;
+  }
+
+  .feed {
+    scroll-behavior: auto;
+  }
+}

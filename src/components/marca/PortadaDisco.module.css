@@ -1,0 +1,90 @@
+/* Escenario de la portada: ocupa la primera pantalla bajo el menú.
+   `--centro-y` es la altura del centro del logo grande dentro de la
+   sección (el logo está fijo: centro a 50svh en escritorio, arriba a 27svh en
+   móvil, como en el Navbar; menos los 64 px del menú). */
+.portada {
+  --alto-menu: 64px;
+  --centro-y: calc(50svh - var(--alto-menu));
+  /* Radio del logo grande (igual que `--logo-grande` del Navbar / 2). */
+  --radio-logo: min(13.4vw, 31svh);
+  position: relative;
+  /* Separación entre el borde del disco y la aguja de «baja». */
+  --hueco-aguja: 0.9rem;
+  --alto-aguja: 44px;
+  /* Termina justo debajo de la aguja: sin pantalla vacía bajo el disco. */
+  min-height: calc(var(--centro-y) + var(--radio-logo) + var(--hueco-aguja) + var(--alto-aguja) + 1.25rem);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.fondo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform-origin: 50% var(--centro-y);
+  /* Se funde con la página por abajo: sin costura al terminar la sección. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  background:
+    radial-gradient(
+      min(46vw, 72svh) min(46vw, 72svh) at 50% var(--centro-y),
+      rgba(255, 215, 0, 0.1),
+      transparent 70%
+    ),
+    radial-gradient(
+      min(22vw, 34svh) min(22vw, 34svh) at 50% var(--centro-y),
+      rgba(255, 215, 0, 0.05),
+      transparent 70%
+    );
+}
+
+/* Marca de «baja»: un hilo de 1 px por el que corre un tramo claro. */
+.pista {
+  position: absolute;
+  left: 50%;
+  /* Pegada al borde inferior del disco, no al final de la sección. */
+  top: calc(var(--centro-y) + var(--radio-logo) + var(--hueco-aguja));
+  width: 1px;
+  height: var(--alto-aguja);
+  translate: -50% 0;
+  overflow: hidden;
+  background: rgba(246, 240, 220, 0.16);
+}
+
+.pista span {
+  position: absolute;
+  inset: 0;
+  background: var(--color-acento-texto, #ffd700);
+  transform: translateY(-100%);
+  animation: bajar 2.4s cubic-bezier(0.77, 0, 0.175, 1) 2.6s infinite;
+}
+
+@keyframes bajar {
+  0% {
+    transform: translateY(-100%);
+  }
+  55%,
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@media (max-width: 720px) {
+  /* Con el contenido apilado bajo el disco, la marca de «baja» sobra. */
+  .pista {
+    display: none;
+  }
+
+  .portada {
+    --radio-logo: min(36vw, 26svh);
+    --centro-y: calc(27svh + var(--radio-logo) - var(--alto-menu));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pista span {
+    animation: none;
+    transform: none;
+    opacity: 0.5;
+  }
+}

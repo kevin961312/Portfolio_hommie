@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirigiendo…</title>
+    <!-- SPA en GitHub Pages: convierte /top-20?perf=dos en /?/top-20&perf=dos
+         y el script de index.html lo devuelve a su forma original.
+         `segmentos` = partes de la ruta que pertenecen a la base:
+           0 → dominio propio o usuario.github.io   (BASE=/)
+           1 → repo de proyecto usuario.github.io/repo/   (BASE=/repo/)
+         Al compilar, vite.config.ts lo ajusta solo según BASE. -->
+    <script>
+      var segmentos = 0;
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + segmentos).join('/') +
+        '/?/' +
+        l.pathname.slice(1).split('/').slice(segmentos).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    </script>
+  </head>
+</html>

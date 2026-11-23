@@ -1,0 +1,238 @@
+/* ── Paleta como el logo: AMARILLO + NEGRO + BLANCO (sin azules, morados ni lilas) ──
+   Amarillos #FFD700 #D6B500 #927B00 #3F3500 #090700 · negros y grises neutros
+   (#000 #0A0A0A #141414 #1C1C1C) · crema #F6F0DC y blanco para texto. Cámbiala
+   aquí: el resto del sitio usa estos tokens.
+   Naturalidad: el color es tinta, no luz. El #FFD700 puro solo en acentos y
+   botones; las superficies son negros/grises sólidos y el texto es crema.
+   Contraste WCAG (calculado): crema #F6F0DC sobre #0A0A0A 17.4:1 y sobre #141414 16.2:1;
+   texto atenuado (crema al 72 %) 9.1:1 sobre #0A0A0A, 8.7:1 sobre #141414 y 8.3:1 sobre
+   #1C1C1C; #FFD700 sobre #0A0A0A 14.1:1 y sobre #141414 13.1:1; #090700 sobre #FFD700
+   14.4:1 y sobre #D6B500 10.0:1; #D6B500 sobre #141414 9.2:1. Todo cumple AA y AAA. */
+:root {
+  color-scheme: dark;
+
+  /* Negros y grises neutros (fondo, superficies) */
+  --color-negro-950: #000000;
+  --color-negro-900: #0a0a0a; /* fondo de página */
+  --color-negro-800: #141414; /* tarjetas y bloques */
+  --color-negro-700: #1c1c1c; /* tarjeta elevada / hover */
+
+  /* Escala amarilla (acentos, texto de acento, bordes, brillos) */
+  --color-oro-500: #ffd700; /* acento puro: títulos, botón principal */
+  --color-oro-400: #d6b500;
+  --color-oro-300: #927b00;
+  --color-oro-200: #3f3500;
+  --color-oro-100: #090700; /* texto sobre amarillo */
+  --color-borde: rgba(255, 255, 255, 0.12); /* borde neutro de tarjetas */
+  --color-borde-fuerte: rgba(255, 215, 0, 0.45);
+
+  --color-crema: #f6f0dc;
+
+  /* ── Tipografía ──
+     Display: Ultra (Clarendon ancha, un solo peso), como los sobreimpresos de sus
+     reels. Solo en mayúsculas y a 28 px o más: títulos, el nombre de la portada y
+     cifras grandes. Por debajo de 28 px y en minúsculas se ve de cartel de feria:
+     ahí va Archivo ancho en negrita (`--ancho-titulo`, peso 800).
+     Texto: Archivo (variable en ancho y peso) para párrafos, créditos e interfaz.
+     Ultra no trae cifras tabulares: los contadores que cambian en vivo van en Archivo.
+     Contraste del ámbar #D6B500: 9,9:1 sobre #0A0A0A y 9,2:1 sobre #141414 (AAA). */
+  --fuente-display: 'Ultra', 'Rockwell Extra Bold', Rockwell, Georgia, serif;
+  --fuente-texto: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --color-display: var(--color-oro-400); /* ámbar de sus títulos */
+  --tracking-display: 0.01em; /* Ultra ya es ancha: sin tracking abierto */
+  --interlineado-display: 1.02;
+  /* Sobreimpreso de sus reels: contorno negro y sombra dura corta. Sobre el negro
+     del sitio una sombra negra no se ve, así que la sombra es el amarillo más
+     oscuro (#3F3500); sobre fotos se usa negro (`--sombra-display-foto`). */
+  --trazo-display: 0.07em;
+  --sombra-display: 0.05em 0.06em 0 var(--color-oro-200);
+  --sombra-display-foto: 0.05em 0.06em 0 var(--color-negro-950);
+  /* Anchos de Archivo (eje wdth, cargado de 75 a 125 en index.html). */
+  --ancho-creditos: 78%; /* etiquetas y créditos, como el librillo de un CD */
+  --ancho-titulo: 112%; /* títulos chicos (< 28 px) en negrita */
+
+  /* Tono natural: tinta, no luz. Fuera de las piezas inmersivas (Top 20,
+     logo) hay superficies sólidas,
+     sombras neutras, títulos en ámbar y botones planos. */
+  --color-superficie: var(--color-negro-800); /* tarjetas y bloques (sólido) */
+  --color-superficie-alta: var(--color-negro-700);
+  --color-accion: var(--color-oro-500);
+  --color-accion-hover: var(--color-oro-400);
+  --color-sobre-accion: var(--color-oro-100);
+  --sombra-suave: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --sombra-elevada: 0 10px 28px -12px rgba(0, 0, 0, 0.6);
+  /* Radios. Sin vidrio ni brillos; esquinas casi rectas como una funda de CD. */
+  --radio-cartel: 2px; /* botones, chips, filtros, controles, sellos y la caja de CD (estilo cartel) */
+  --radio-sm: 4px; /* barras de progreso y detalles pequeños */
+  --radio-pildora: 999px; /* solo la barra de desplazamiento; círculos reales con 50% */
+
+  /* Fondos */
+  --color-bg: var(--color-negro-900);
+  --color-bg-elevado: var(--color-negro-800);
+  --color-surface: var(--color-negro-800);
+  --color-surface-hover: var(--color-negro-700);
+
+  /* Texto */
+  --color-text: var(--color-crema);
+  --color-text-muted: rgba(246, 240, 220, 0.72);
+  --color-acento-texto: var(--color-oro-500);
+
+  --sombra-tarjeta: 0 24px 60px -30px rgba(0, 0, 0, 0.9);
+  --radio: 8px; /* tarjetas, botones, visores */
+
+  font-family: var(--fuente-texto);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Colores registrados para que los fondos cambien de tono con transición. */
+@property --c1 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1c1c1c;
+}
+
+@property --c2 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffd700;
+}
+
+/* Paleta por cuenta (usuarios de `cuentas` en contenido/sitio.json): --c1 es el negro/gris
+   oscuro (lleva texto blanco encima) y --c2 el amarillo de los brillos. */
+[data-cuenta='losdiscosdelhomie'] {
+  --c1: var(--color-negro-700);
+  --c2: var(--color-oro-500);
+}
+
+[data-cuenta='los.discos.del.homie'] {
+  --c1: var(--color-negro-800);
+  --c2: var(--color-oro-400);
+}
+
+[data-cuenta='el.homie.de.siempre'] {
+  --c1: var(--color-negro-900);
+  --c2: var(--color-oro-300);
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+/* Grano de cartón de funda muy sutil (3,5 %): quita el brillo liso de plástico. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty; /* sin palabras sueltas en la última línea */
+}
+
+a {
+  color: var(--color-acento-texto);
+  text-decoration: none;
+}
+
+a:hover {
+  color: #fff;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-oro-400);
+  outline-offset: 3px;
+}
+
+code {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.85em;
+}
+
+::selection {
+  background: rgba(255, 215, 0, 0.3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.35);
+  border-radius: var(--radio-pildora);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-oro-400);
+}
+
+/* Con un visor (dialog) abierto, la página de fondo no se desplaza. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+/* ── Aparecer al hacer scroll ── */
+/* Clase global: cualquier bloque con `revelar` sube y aparece al entrar
+   en pantalla. Sin JavaScript; donde el navegador no lo soporta, se ve
+   directo y sin animación. */
+@supports (animation-timeline: view()) {
+  .revelar {
+    animation: revelar linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+}
+
+@keyframes revelar {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .revelar {
+    animation: none;
+  }
+}

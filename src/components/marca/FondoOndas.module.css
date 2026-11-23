@@ -1,0 +1,79 @@
+/* Mismo centro y radio que el disco grande de la portada (ver Navbar y
+   PortadaDisco): centro a 50svh en escritorio; en móvil, el borde de
+   arriba a 27svh. Como la capa es fija, el centro es de la ventana. */
+.fondo {
+  --radio-disco: min(13.4vw, 31svh);
+  --centro-y: 50svh;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Surcos de vinilo, apagándose hacia afuera. */
+.surcos {
+  position: absolute;
+  inset: 0;
+  background: repeating-radial-gradient(
+    circle at 50% var(--centro-y),
+    rgba(246, 240, 220, 0.04) 0 1px,
+    transparent 1px 6px
+  );
+  -webkit-mask-image: radial-gradient(
+    min(48vw, 76svh) min(48vw, 76svh) at 50% var(--centro-y),
+    #000 30%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    min(48vw, 76svh) min(48vw, 76svh) at 50% var(--centro-y),
+    #000 30%,
+    transparent 100%
+  );
+}
+
+/* Ondas: anillos del tamaño del disco que crecen despacio y se apagan,
+   uno cada 3 s. Muy tenues: acompañan, no llaman la atención. */
+.ondas span {
+  position: absolute;
+  left: 50%;
+  top: var(--centro-y);
+  width: calc(var(--radio-disco) * 2);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  opacity: 0;
+  animation: onda 12s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+
+.ondas span:nth-child(2) { animation-delay: 3s; }
+.ondas span:nth-child(3) { animation-delay: 6s; }
+.ondas span:nth-child(4) { animation-delay: 9s; }
+
+@keyframes onda {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .fondo {
+    --radio-disco: min(36vw, 26svh);
+    --centro-y: calc(27svh + var(--radio-disco));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ondas {
+    display: none;
+  }
+}

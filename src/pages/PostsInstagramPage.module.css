@@ -1,0 +1,366 @@
+[data-tema='fichas'] { --tema: var(--color-oro-500); }
+[data-tema='recom'] { --tema: var(--color-crema); }
+[data-tema='fest'] { --tema: var(--color-oro-400); }
+[data-tema='eventos'] { --tema: var(--color-crema); }
+[data-tema='entrev'] { --tema: var(--color-oro-500); }
+[data-tema='colab'] { --tema: var(--color-oro-400); }
+[data-tema='retratos'] { --tema: var(--color-crema); }
+
+.page {
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+/* Filtros: se pegan bajo el menú al bajar por el muro. */
+.barra {
+  position: sticky;
+  top: 64px;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.2rem;
+  margin: 0 -1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-negro-900);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.grupo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip,
+.orden button {
+  min-height: 38px;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radio-cartel);
+  border: 1px solid var(--color-borde);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.chip:hover,
+.orden button:hover {
+  color: #fff;
+  border-color: rgba(246, 240, 220, 0.4);
+}
+
+.chip[aria-pressed='true'] {
+  border-color: transparent;
+  background: var(--color-accion);
+  color: var(--color-sobre-accion);
+}
+
+.chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.punto {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 0.45rem;
+  border-radius: 50%;
+  background: var(--tema);
+}
+
+.chip[aria-pressed='true'] .punto {
+  background: var(--color-sobre-accion);
+}
+
+.separador {
+  width: 1px;
+  height: 22px;
+  flex-shrink: 0;
+  background: var(--color-borde);
+}
+
+/* Etiqueta de tema de cada tarjeta. */
+.temas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tema {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-stretch: var(--ancho-creditos);
+  color: var(--tema);
+}
+
+.tema .punto {
+  width: 6px;
+  height: 6px;
+  margin-right: 0;
+  box-shadow: none;
+}
+
+/* Orden: control segmentado. */
+.orden {
+  display: flex;
+  margin-left: auto;
+  padding: 3px;
+  border-radius: var(--radio-cartel);
+  border: 1px solid var(--color-borde);
+  background: var(--color-surface);
+}
+
+.orden button {
+  min-height: 32px;
+  border: none;
+  background: none;
+}
+
+.orden button[aria-pressed='true'] {
+  background: var(--color-accion);
+  color: var(--color-sobre-accion);
+}
+
+.conteo {
+  margin: 1.25rem 0 1rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.vacio {
+  padding: 3rem 0;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* 8 por página: 2 filas de 4 (en pantallas medianas y celular, 4 de 2). */
+.muro {
+  --gap-columnas: 1.25rem;
+  --sobra-estante: calc(var(--gap-columnas) / 2); /* une las líneas de una fila en un estante */
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  gap: 1.5rem var(--gap-columnas);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+/* Video horizontal: ocupa dos columnas y su tarjeta mide lo mismo de alto
+   que una vertical de la fila (4:5 de una columna), así los títulos quedan
+   alineados. `dense` rellena el hueco si le toca caer en la última columna. */
+.item[data-horizontal] {
+  grid-column: span 2;
+  container-type: inline-size;
+}
+
+.item[data-horizontal] > :first-child {
+  height: calc((100cqw - var(--gap-columnas)) / 2 * 1.25);
+}
+
+/* Los que el filtro saca siguen montados (con su post ya cargado). */
+.muro[hidden],
+.item[hidden] {
+  display: none;
+}
+
+.pie {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0 0.2rem;
+}
+
+/* Estante: cada pieza se apoya en una línea de 1 px (la caja de CD la trae
+   en su componente; aquí la de las tarjetas, justo bajo la tarjeta). */
+.pie::before {
+  content: '';
+  position: absolute;
+  top: calc(-0.7rem - 1px);
+  right: calc(-0.2rem - var(--sobra-estante));
+  left: calc(-0.2rem - var(--sobra-estante));
+  height: 1px;
+  background: var(--color-oro-200);
+}
+
+/* Caja de CD: los créditos los pone la caja; aquí solo las cifras. */
+.item[data-caja] {
+  gap: 0.5rem;
+}
+
+/* Estante de solo cajas (filtro «Fichas de discos»): filas más juntas. */
+.muro[data-estante] {
+  row-gap: 2rem;
+}
+
+.titulo {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #fff;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+.likes {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.likes svg {
+  fill: var(--color-oro-400);
+  stroke: var(--color-oro-400);
+}
+
+.cuenta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.externo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  flex-shrink: 0;
+  border-radius: var(--radio-cartel);
+  border: 1px solid var(--color-borde);
+}
+
+/* Objetivo táctil de 44 px sin agrandar el botón dibujado. */
+.externo::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+/* ── Loader del scroll infinito ── */
+.masPosts {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 2.5rem 0 1rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.giro {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid rgba(246, 240, 220, 0.25);
+  border-top-color: var(--color-oro-400);
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .giro {
+    animation-duration: 2.4s;
+  }
+}
+
+@media (max-width: 900px) {
+  .muro {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 0 1rem 3rem;
+  }
+
+  .barra {
+    margin: 0 -1rem;
+    padding: 0.6rem 1rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .barra::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Pista de que hay más filtros a la derecha: un velo pegado al borde que
+     se desvanece cuando se llega al final (ocupa su propio hueco). */
+  .barra::after {
+    content: '';
+    position: sticky;
+    right: -1rem;
+    flex: 0 0 2.5rem;
+    align-self: stretch;
+    margin: -0.6rem -1rem -0.6rem -2.5rem;
+    background: linear-gradient(to right, rgba(10, 10, 10, 0), rgba(10, 10, 10, 0.95) 70%);
+    pointer-events: none;
+  }
+
+  .grupo {
+    flex-wrap: nowrap;
+  }
+
+  .orden {
+    margin-left: 0;
+  }
+
+  /* Dos columnas: el post se encoge para caber (PostVivo lo escala). */
+  .muro {
+    --gap-columnas: 0.75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem var(--gap-columnas);
+  }
+
+  .titulo {
+    font-size: 0.8rem;
+  }
+
+  .tema {
+    font-size: 0.75rem; /* 12 px como mínimo también en celular */
+  }
+
+  .cuenta {
+    display: none;
+  }
+}

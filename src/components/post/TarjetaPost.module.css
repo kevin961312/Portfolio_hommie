@@ -1,0 +1,87 @@
+.tarjeta {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radio);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-borde), var(--sombra-tarjeta);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tarjeta:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 1px rgba(246, 240, 220, 0.4), var(--sombra-elevada);
+}
+
+.sello {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radio-cartel);
+  background: var(--color-accion);
+  color: var(--color-sobre-accion);
+  font-size: 0.75rem;
+  font-weight: 800;
+  pointer-events: none;
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.6);
+}
+
+/* Capa que abre el post en grande: tapa la vista previa (que no recibe toques). */
+.abrir {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 14px;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  cursor: zoom-in;
+  transition: background 0.25s ease;
+}
+
+.abrirPista {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radio-cartel);
+  background: rgba(10, 10, 10, 0.85);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  opacity: 0;
+  translate: 0 6px;
+  transition: opacity 0.2s ease, translate 0.2s ease;
+}
+
+.abrir:hover,
+.abrir:focus-visible {
+  background: linear-gradient(to top, rgba(10, 10, 10, 0.55), transparent 45%);
+}
+
+.abrir:hover .abrirPista,
+.abrir:focus-visible .abrirPista {
+  opacity: 1;
+  translate: 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta,
+  .tarjeta:hover {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Ancha (video horizontal en el muro): sin proporción fija, el alto lo
+   pone quien la usa. */
+.tarjeta[data-ancha] {
+  aspect-ratio: auto;
+}

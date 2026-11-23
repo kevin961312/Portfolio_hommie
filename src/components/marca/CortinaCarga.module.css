@@ -1,0 +1,64 @@
+/* Cortina de la primera carga: dos franjas oscuras inclinadas −8° que
+   se tocan en el centro, y sobre la costura una línea de 1 px que se
+   llena con la carga. La cortina en sí es transparente: tapan las franjas. */
+.cortina {
+  --cortina-fondo: #0a0a0a;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+  /* Mientras tapa, no deja tocar lo de abajo; al abrirse, sí. */
+  pointer-events: auto;
+}
+
+.cortina[data-abriendo] {
+  pointer-events: none;
+}
+
+.franja {
+  position: absolute;
+  left: -50vw;
+  width: 200vw;
+  /* 75vh − 25vh: el borde interior de cada franja cae en la mitad. */
+  height: 75.2vh;
+  background: var(--cortina-fondo);
+  rotate: -8deg;
+}
+
+.arriba {
+  top: -25vh;
+}
+
+.abajo {
+  bottom: -25vh;
+}
+
+/* El surco: pista tenue y relleno amarillo que crece con la carga. */
+.linea {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18vw;
+  min-width: 160px;
+  height: 1px;
+  translate: -50% -50%;
+  rotate: -8deg;
+  background: rgba(255, 215, 0, 0.16);
+  overflow: hidden;
+}
+
+.relleno {
+  position: absolute;
+  inset: 0;
+  background: var(--color-acento-texto, #ffd700);
+  transform: scaleX(0);
+  transform-origin: left center;
+  /* power2.out */
+  transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@media (max-width: 720px) {
+  .linea {
+    width: 43vw;
+  }
+}

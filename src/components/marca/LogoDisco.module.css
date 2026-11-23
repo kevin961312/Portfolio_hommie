@@ -1,0 +1,54 @@
+/* Logo tocadiscos. Colores del sitio: las letras usan el acento
+   (`--color-acento-texto`) y el disco un tono más oscuro que el fondo,
+   para que se lea como un vinilo encima de la página. Se pueden fijar
+   por sitio con `--color-logo-letra` / `--color-logo-disco` en index.css. */
+.logo {
+  --logo-letra: var(--color-logo-letra, var(--color-acento-texto, #ffd700));
+  --logo-disco: var(--color-logo-disco, #0a0a0a);
+  --logo-brillo: var(--color-logo-brillo, rgba(255, 215, 0, 0.2));
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Tocar el disco en móvil no selecciona ni abre el menú contextual. */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* Brillo fijo (no gira): un anillo difuso justo por fuera del disco. */
+.halo {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.rotor {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  /* La caja del SVG está centrada en el disco: gira sin cabecear. */
+  transform-origin: 50% 50%;
+}
+
+.costura {
+  fill: var(--logo-letra);
+  stroke: var(--logo-letra);
+  stroke-linejoin: round;
+}
+
+.disco {
+  fill: var(--logo-disco);
+}
+
+.letra {
+  fill: var(--logo-letra);
+}
+
+/* Mientras está la cortina de carga, las piezas esperan ocultas. */
+.logo[data-oculto] path,
+.logo[data-oculto] .halo {
+  opacity: 0;
+}

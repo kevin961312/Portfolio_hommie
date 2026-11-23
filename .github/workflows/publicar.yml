@@ -1,0 +1,77 @@
+# ──────────────────────────────────────────────────────────────────────
+# Publicar el sitio en GitHub Pages con GitHub Actions.
+#
+# Cada push a `main` (también los que hace el editor /admin) valida el
+# contenido, compila y publica. Si algo falla, Pages sigue mostrando la
+# versión anterior: el sitio nunca queda roto.
+#
+# ESTADO: listo pero INACTIVO. Se activa cuando exista el repo propio del
+# cliente: en GitHub → Settings → Pages → «Build and deployment» → Source:
+# «GitHub Actions». Mientras Pages siga en «Deploy from a branch» (carpeta
+# docs/), este workflow corre pero el paso de despliegue falla sin tocar el
+# sitio; por eso solo se dispara en el repo del cliente (ver `if:` abajo).
+# Pasos completos en README → «Publicación con GitHub Actions».
+# ──────────────────────────────────────────────────────────────────────
+name: Publicar sitio
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Una sola publicación a la vez; si llega otro push, la que va en cola se
+# reemplaza, pero la que ya está desplegando termina.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  compilar:
+    # Solo publica desde el repo del sitio (en una copia o fork no hace nada).
+    if: github.repository == 'kevin961312/Portfolio_hommie'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Validar contenido
+        run: npm run validar
+
+      - name: Revisar código
+        run: npm run lint
+
+      - name: Configurar Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      # base_path es '' con dominio propio o usuario.github.io, y '/repo'
+      # en un repo de proyecto; vite.config.ts lo normaliza.
+      - name: Compilar
+        run: npm run build
+        env:
+          BASE: ${{ steps.pages.outputs.base_path }}/
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+
+  publicar:
+    needs: compilar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

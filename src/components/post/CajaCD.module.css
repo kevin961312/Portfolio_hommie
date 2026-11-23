@@ -1,0 +1,258 @@
+/* Caja de CD (jewel case) de 142 × 125 mm. Medidas en % de la caja:
+   bisagra 8 %, bandeja libre hasta el 14 %, librillo cuadrado de 120 mm
+   (84,5 % del ancho y 96 % del alto) y el CD de 120 mm detrás.
+   Material sobrio: negro, filetes crema al 12 %, sombra de contacto negra;
+   sin reflejos ni brillos. */
+
+.ficha {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+/* Hueco de la caja con la línea del estante debajo (1 px de latón oscuro).
+   `--sobra-estante` la alarga a los lados para que, en una rejilla, las
+   líneas de una fila se unan en un solo estante. */
+.objeto {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+
+.objeto::after {
+  content: '';
+  position: absolute;
+  right: calc(-1 * var(--sobra-estante, 0px));
+  bottom: -1px;
+  left: calc(-1 * var(--sobra-estante, 0px));
+  height: 1px;
+  background: var(--color-oro-200);
+}
+
+/* Junto a tarjetas 4:5: mismo alto que ellas, con la caja apoyada abajo. */
+.ficha[data-alineada] .objeto {
+  aspect-ratio: 4 / 5;
+}
+
+/* El botón es la caja más el hueco por el que asoma el CD (14 % de la caja):
+   así el CD nunca pisa la pieza vecina. */
+.estuche {
+  --asoma: 14cqi;
+  position: relative;
+  display: block;
+  width: calc(100% / 1.14);
+  aspect-ratio: 142 / 125;
+  padding: 0;
+  border: none;
+  border-radius: var(--radio-cartel);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  container-type: inline-size;
+}
+
+.caja {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radio-cartel);
+  background: var(--color-negro-800); /* la bandeja que se ve entre bisagra y librillo */
+  box-shadow: 0 12px 14px -10px rgba(0, 0, 0, 0.85);
+}
+
+/* Canto del estuche: un filete de 1 px, encima de todo. */
+.caja::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border: 1px solid rgba(246, 240, 220, 0.14);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Bisagra: franja negra con dos líneas de 1 px y los dos topes del eje. */
+.bisagra {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 8%;
+  background: var(--color-negro-950);
+  box-shadow: inset -1px 0 rgba(246, 240, 220, 0.12);
+}
+
+/* Los topes del eje, arriba y abajo (≈4 % del alto de la caja). */
+.bisagra::after {
+  content: '';
+  position: absolute;
+  inset: 0 27%;
+  border-block: 3.5cqi solid var(--color-negro-700);
+}
+
+.bisagra::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 32%;
+  width: 1px;
+  background: rgba(246, 240, 220, 0.12);
+}
+
+/* Librillo: 120 × 120 mm, pegado a la derecha como en la caja real. */
+.librillo {
+  position: absolute;
+  top: 2%;
+  right: 1.5%;
+  bottom: 2%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--color-negro-900);
+}
+
+.portada {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sinPortada {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 10%;
+  font-size: max(0.875rem, 7cqi);
+  font-weight: 800;
+  font-stretch: var(--ancho-titulo);
+  line-height: 1.15;
+  text-align: center;
+  color: var(--color-display);
+}
+
+/* Etiqueta de tienda de discos sobre el plástico. */
+.sello {
+  position: absolute;
+  top: 5%;
+  right: 4%;
+  z-index: 2;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radio-cartel);
+  background: var(--color-accion);
+  color: var(--color-sobre-accion);
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-stretch: var(--ancho-creditos);
+  line-height: 1.3;
+}
+
+/* El CD (120 mm) dentro de la bandeja, detrás del librillo: canto plateado
+   (crema sobre gris), cara impresa negra y un anillo ámbar del sello. */
+.cd {
+  position: absolute;
+  top: 2%;
+  right: 1.5%;
+  z-index: 0;
+  height: 96%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-crema) 58%, var(--color-negro-700));
+  transition: transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.cd::before,
+.cd::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+}
+
+.cd::before {
+  inset: 3.5%;
+  background: var(--color-negro-950);
+}
+
+.cd::after {
+  inset: 13%;
+  border: 1px solid var(--color-oro-400);
+}
+
+/* La única microinteracción: el CD sale un 14 % por la derecha, como al
+   sacarlo de la caja. Entra en 200 ms y vuelve en 140 ms. */
+@media (hover: hover) and (pointer: fine) {
+  .estuche:hover .cd {
+    transform: translateX(var(--asoma));
+    transition-duration: 200ms;
+  }
+}
+
+.estuche:focus-visible .cd {
+  transform: translateX(var(--asoma));
+  transition-duration: 200ms;
+}
+
+/* ── Créditos del librillo ── */
+.creditos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: calc(100% / 1.14);
+  min-width: 0;
+  font-stretch: var(--ancho-creditos);
+}
+
+.disco {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-crema);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.artista {
+  font-size: 0.875rem;
+  line-height: 1.3;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Latón sobre el fondo de página (#0A0A0A): 4,8:1. */
+.lanzamiento {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-oro-300);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* Sin desplazamiento: el CD no sale y la caja se marca con un borde de 2 px. */
+@media (prefers-reduced-motion: reduce) {
+  .cd {
+    transition: none;
+  }
+
+  .estuche:hover .cd,
+  .estuche:focus-visible .cd {
+    transform: none;
+  }
+
+  .estuche:hover .caja::after {
+    border: 2px solid var(--color-oro-400);
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "nombre": "Los Discos del Homie",
+  "portada": {
+    "nombre": "Los Discos",
+    "apellido": "del Homie"
+  },
+  "profesion": "Creador de contenido · Rap",
+  "contacto": {
+    "whatsapp": {
+      "numero": "311 830 1493",
+      "indicativo": "57"
+    },
+    "correo": "losdiscosdelhomie@gmail.com",
+    "telefono": "",
+    "ciudad": ""
+  },
+  "redes": [
+    {
+      "tipo": "instagram",
+      "nombre": "Instagram",
+      "usuario": "losdiscosdelhomie",
+      "url": "https://www.instagram.com/losdiscosdelhomie/"
+    },
+    {
+      "tipo": "tiktok",
+      "nombre": "TikTok",
+      "usuario": "los.discos.del.homie",
+      "url": "https://www.tiktok.com/@los.discos.del.homie"
+    },
+    {
+      "tipo": "otra",
+      "nombre": "Cuenta personal",
+      "usuario": "el.homie.de.siempre",
+      "url": ""
+    }
+  ],
+  "cuentas": [
+    {
+      "usuario": "losdiscosdelhomie",
+      "nombre": "Los Discos del Homie",
+      "iniciales": "DH"
+    },
+    {
+      "usuario": "los.discos.del.homie",
+      "nombre": "Los Discos del Homie · TikTok",
+      "iniciales": "DH"
+    },
+    {
+      "usuario": "el.homie.de.siempre",
+      "nombre": "El Homie de Siempre",
+      "iniciales": "H"
+    }
+  ],
+  "cuentaPersonal": "losdiscosdelhomie"
+}

@@ -1,0 +1,131 @@
+{
+  "perfiles": {
+    "principal": {
+      "nombreCorto": "Perfil principal",
+      "rol": "Creador de contenido · Rap · Bogotá",
+      "titular": "Aquí solo se habla de rap. 💿💎",
+      "sobreMi": [
+        "Soy el Homie, de Bogotá, y desde Los Discos del Homie cuento la historia de los discos que marcaron el género: cada ficha trae el álbum y su fecha de lanzamiento.",
+        "Publico en Instagram y TikTok, casi todo en reels. También cubro conciertos y festivales de rap en Bogotá, como Cypress Hill o Salsa al Parque, donde se juntaron salsa y rap.",
+        "Trabajo con otros creadores y siempre con la mirada de un coleccionista: discos, fechas y datos que no se olvidan. Si quieres sumar tu proyecto, escríbeme."
+      ],
+      "metricas": [
+        {
+          "id": "pri-seguidores",
+          "categoria": "alcance",
+          "etiqueta": "Seguidores",
+          "detalle": "Instagram 1.229 · TikTok 2.978",
+          "valor": 4207
+        },
+        {
+          "categoria": "publicaciones",
+          "etiqueta": "Piezas publicadas",
+          "detalle": "130 en Instagram y 2 videos que solo están en TikTok",
+          "valor": 132,
+          "id": "pri-piezas"
+        },
+        {
+          "categoria": "alcance",
+          "etiqueta": "Reproducciones en TikTok",
+          "detalle": "Suma de los 121 videos del canal (dato de TikTok, escrito a mano)",
+          "valor": 405403,
+          "compacto": true,
+          "id": "pri-tiktok"
+        },
+        {
+          "categoria": "destacado",
+          "etiqueta": "Video más visto",
+          "detalle": "Reproducciones del reel con más alcance: recomendaciones de HHAP 2024",
+          "calculo": "picoAlcance",
+          "id": "pri-mas-visto"
+        }
+      ],
+      "secciones": [
+        "/",
+        "/top-20",
+        "/posts-instagram"
+      ],
+      "tituloDocumento": "{nombre} · Perfil principal"
+    },
+    "secundario": {
+      "nombreCorto": "Perfil secundario",
+      "rol": "Cobertura de conciertos y festivales",
+      "titular": "El rap en vivo en Bogotá, contado desde la tarima y desde el público.",
+      "sobreMi": [
+        "Soy el Homie, de Bogotá, y desde Los Discos del Homie cuento la historia de los discos que marcaron el género: cada ficha trae el álbum y su fecha de lanzamiento.",
+        "Publico en Instagram y TikTok, casi todo en reels. También cubro conciertos y festivales de rap en Bogotá, como Cypress Hill o Salsa al Parque, donde se juntaron salsa y rap.",
+        "Trabajo con otros creadores y siempre con la mirada de un coleccionista: discos, fechas y datos que no se olvidan. Si quieres sumar tu proyecto, escríbeme."
+      ],
+      "metricas": [
+        {
+          "categoria": "publicaciones",
+          "etiqueta": "Piezas publicadas",
+          "detalle": "130 en Instagram y 2 videos que solo están en TikTok",
+          "valor": 132,
+          "id": "sec-piezas"
+        },
+        {
+          "categoria": "alcance",
+          "etiqueta": "Reproducciones en TikTok",
+          "detalle": "Suma de los 121 videos del canal (dato de TikTok, escrito a mano)",
+          "valor": 405403,
+          "compacto": true,
+          "id": "sec-tiktok"
+        },
+        {
+          "categoria": "destacado",
+          "etiqueta": "Video más visto",
+          "detalle": "Reproducciones del reel con más alcance: recomendaciones de HHAP 2024",
+          "calculo": "picoAlcance",
+          "id": "sec-mas-visto"
+        }
+      ],
+      "secciones": [
+        "/",
+        "/top-20",
+        "/posts-instagram"
+      ],
+      "tituloDocumento": "{nombre} · Perfil secundario"
+    },
+    "terciario": {
+      "nombreCorto": "Perfil terciario",
+      "rol": "Fichas de discos · Coleccionista",
+      "titular": "Cada disco con su historia y su fecha de lanzamiento.",
+      "sobreMi": [
+        "Soy el Homie, de Bogotá, y desde Los Discos del Homie cuento la historia de los discos que marcaron el género: cada ficha trae el álbum y su fecha de lanzamiento.",
+        "Publico en Instagram y TikTok, casi todo en reels. También cubro conciertos y festivales de rap en Bogotá, como Cypress Hill o Salsa al Parque, donde se juntaron salsa y rap.",
+        "Trabajo con otros creadores y siempre con la mirada de un coleccionista: discos, fechas y datos que no se olvidan. Si quieres sumar tu proyecto, escríbeme."
+      ],
+      "metricas": [
+        {
+          "categoria": "publicaciones",
+          "etiqueta": "Fichas de discos",
+          "detalle": "Reels con la portada, el año y los datos de cada disco",
+          "calculo": "totalFichas",
+          "id": "ter-fichas"
+        },
+        {
+          "categoria": "alcance",
+          "etiqueta": "Reproducciones en TikTok",
+          "detalle": "Suma de los 121 videos del canal (dato de TikTok, escrito a mano)",
+          "valor": 405403,
+          "compacto": true,
+          "id": "ter-tiktok"
+        },
+        {
+          "categoria": "destacado",
+          "etiqueta": "Video más visto",
+          "detalle": "Reproducciones del reel con más alcance: recomendaciones de HHAP 2024",
+          "calculo": "picoAlcance",
+          "id": "ter-mas-visto"
+        }
+      ],
+      "secciones": [
+        "/",
+        "/top-20",
+        "/posts-instagram"
+      ],
+      "tituloDocumento": "{nombre} · Perfil terciario"
+    }
+  }
+}
